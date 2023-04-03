@@ -1,0 +1,11 @@
+[package]
+name = "loki-client"
+description = "Fast GUI Loki chat client."
+authors = ["The Loki Authors"]
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+loki-shared = { path = "../loki-shared" }
+lokui = { path = "../lokui" }
+protolok = { path = "../protolok" }

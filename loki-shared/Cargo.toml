@@ -1,0 +1,8 @@
+[package]
+name = "loki-shared"
+description = "Shared modules between the client and the backend."
+authors = ["The Loki Authors"]
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

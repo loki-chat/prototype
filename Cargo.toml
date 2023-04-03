@@ -1,0 +1,2 @@
+[workspace]
+members = ["loki-client", "loki-server", "loki-shared", "lokui", "protolok"]

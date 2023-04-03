@@ -1,0 +1,8 @@
+[package]
+name = "protolok"
+description = "Custom internet protocol for Loki."
+authors = ["The Loki Authors"]
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
