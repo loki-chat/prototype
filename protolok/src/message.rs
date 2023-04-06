@@ -41,6 +41,8 @@ impl MessageContent {
 pub struct Message {
 	id: Option<String>,
 	from: Option<UserHandle>,
+    in_reply_to: Option<String>,
+    mentions: Vec<UserHandle>,
 	content: MessageContent,
 }
 
