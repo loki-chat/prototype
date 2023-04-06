@@ -6,3 +6,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+base16ct = "0.2"
+rand = "0.8.5"
+rsa = "0.8"
+sha2 = "0.10"
