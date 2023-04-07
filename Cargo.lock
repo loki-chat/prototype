@@ -140,6 +140,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "loki-frontend-prototype"
+version = "0.1.0"
+
+[[package]]
 name = "loki-server"
 version = "0.1.0"
 dependencies = [
