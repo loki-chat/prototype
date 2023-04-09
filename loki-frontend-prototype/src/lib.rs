@@ -1,4 +1,5 @@
 mod app;
+mod ui;
 
 pub fn run() {
 	let native_options = eframe::NativeOptions::default();
