@@ -1,6 +1,6 @@
 use eframe::egui;
 
-use crate::ui::views::MainView;
+use crate::ui::views::main::MainView;
 
 pub struct App {
 	view: View,
