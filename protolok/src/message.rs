@@ -1,4 +1,4 @@
-use rsa::{PaddingScheme, Pkcs1v15Encrypt, PublicKey, RsaPrivateKey, RsaPublicKey};
+use rsa::{Pkcs1v15Encrypt, PublicKey, RsaPrivateKey, RsaPublicKey};
 
 use crate::user::UserHandle;
 
@@ -19,11 +19,11 @@ pub enum MessageContent {
 	Unencrypted(UnencryptedContent),
 }
 impl MessageContent {
-	fn is_encrypted(&self) -> bool {
+	pub fn is_encrypted(&self) -> bool {
 		matches!(self, &MessageContent::Encrypted { .. })
 	}
 
-	fn decrypt(&self, key: &RsaPrivateKey) -> Result<MessageContent, rsa::errors::Error> {
+	pub fn decrypt(&self, key: &RsaPrivateKey) -> Result<MessageContent, rsa::errors::Error> {
 		match self {
 			MessageContent::Encrypted(EncryptedContent { hash, enc_text }) => {
 				key.decrypt(Pkcs1v15Encrypt, &enc_text).map(|x| {
@@ -39,11 +39,11 @@ impl MessageContent {
 }
 
 pub struct Message {
-	id: Option<String>,
-	from: Option<UserHandle>,
-    in_reply_to: Option<String>,
-    mentions: Vec<UserHandle>,
-	content: MessageContent,
+	pub id: Option<String>,
+	pub from: Option<UserHandle>,
+	pub in_reply_to: Option<String>,
+	pub mentions: Vec<UserHandle>,
+	pub content: MessageContent,
 }
 
 pub fn encrypt(

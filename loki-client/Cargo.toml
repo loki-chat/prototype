@@ -9,3 +9,6 @@ edition = "2021"
 loki-shared = { path = "../loki-shared" }
 lokui = { path = "../lokui" }
 protolok = { path = "../protolok" }
+rsa = "0.8.2"
+sha2 = "0.10.6"
+tokio = { version = "1.27.0", features = ["full"] } # TODO: change feature flags
