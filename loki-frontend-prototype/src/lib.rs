@@ -1,4 +1,6 @@
 mod app;
+mod id;
+mod model;
 mod ui;
 
 pub fn run() {
