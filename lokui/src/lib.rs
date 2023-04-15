@@ -1,14 +1,13 @@
-pub fn add(left: usize, right: usize) -> usize {
-	left + right
-}
+mod app;
+mod components;
+mod ecs;
 
 #[cfg(test)]
-mod tests {
-	use super::*;
+mod test {
+	use crate::app::App;
 
 	#[test]
-	fn it_works() {
-		let result = add(2, 2);
-		assert_eq!(result, 4);
+	fn test() {
+		let app = App::default();
 	}
 }

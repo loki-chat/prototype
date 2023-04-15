@@ -6,3 +6,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+bevy_ecs = { version = "0.10.1", features = [] }
+bevy_hierarchy = "0.10.1"
+miniquad = { git = "https://github.com/loki-chat/lokinit.git" }
