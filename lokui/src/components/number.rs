@@ -1,15 +1,23 @@
+use crate::layout::{Layout, SolvedLayout};
 use crate::lazy::Laz;
-use crate::widget::{Widget, Event};
+use crate::widget::{Event, Widget};
 
-pub struct Number(Laz<i64>);
-
-pub fn number(val: Laz<i64>) -> Number {
-	Number(val)
+pub struct Number {
+	layout: Layout,
+	number: Laz<i64>,
 }
 
+// pub fn number(val: Laz<i64>) -> Number {
+// 	Number(val)
+// }
+
 impl Widget for Number {
-	fn draw(&self, indent: usize) {
-		println!("{}<num>{}</num>", "  ".repeat(indent), self.0.get());
+	fn layout(&self) -> &Layout {
+		&self.layout
+	}
+
+	fn draw(&self, layout: SolvedLayout) {
+		// TODO: draw number as text?
 	}
 
 	fn update(&mut self, _event: Event) -> bool {
