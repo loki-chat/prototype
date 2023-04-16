@@ -41,5 +41,5 @@ pub trait Widget {
 	}
 
 	fn draw(&self, skia_ctx: &mut SkiaContext, layout: &SolvedLayout);
-	fn handle_event(&mut self, event: Event) -> bool;
+	fn handle_event(&mut self, event: Event, layout: &SolvedLayout) -> bool;
 }

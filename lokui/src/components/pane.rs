@@ -1,5 +1,5 @@
 use miniquad::skia::SkiaContext;
-use skia_safe::{Rect, Paint, Color};
+use skia_safe::{Color, Paint, Rect};
 
 use crate::layout::{DimScalar, Direction, FlexLayout, Layout, Padding, SolvedLayout};
 use crate::widget::{Event, Widget};
@@ -70,13 +70,14 @@ impl Widget for Pane {
 		if let Some(_auto_layout) = &self.flex_layout {
 			// With auto-layout, all children are placed next to each other, vertically or horizontally.
 
+			// for child in &mut self.children {}
 			todo!("no auto-layout for now");
-		// for child in &mut self.children {}
 		} else {
 			// Without auto-layout, all children are superposed to each other.
 
 			for child in &mut self.children {
 				child.solved_layout = child.widget.solve_layout(&inner_layout);
+				println!("solved child layout: {:?}", &child.solved_layout);
 			}
 		}
 
@@ -153,22 +154,28 @@ impl Widget for Pane {
 		paint.set_color(Color::from(0xff_00cc51));
 		canvas.draw_rect(rect, &paint);
 
-		println!("[");
 		for child in &self.children {
-			println!("  drawing child with solved layout {:?}", &child.solved_layout);
+			println!("  drawing child with {:?}", &child.solved_layout);
 			child.widget.draw(skia_ctx, &child.solved_layout);
 		}
-		println!("]");
 	}
 
-	fn handle_event(&mut self, event: Event) -> bool {
+	fn handle_event(&mut self, event: Event, layout: &SolvedLayout) -> bool {
 		let mut handled = false;
 
-		for child in &mut self.children {
-			handled |= child.widget.handle_event(event);
+		let should_handle = match event {
+			Event::Clicked(x, y) => layout.contains(x, y),
+			_ => true,
+		};
 
-			if handled {
-				break;
+		if should_handle {
+			println!("we do handle the event");
+			for child in &mut self.children {
+				handled |= child.widget.handle_event(event, &child.solved_layout);
+
+				if handled {
+					break;
+				}
 			}
 		}
 

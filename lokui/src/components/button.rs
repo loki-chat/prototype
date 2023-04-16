@@ -14,6 +14,11 @@ pub struct Button {
 }
 
 impl Button {
+	pub fn with_layout(mut self, layout: Layout) -> Self {
+		self.layout = layout;
+		self
+	}
+
 	pub fn on_click(mut self, on_click: impl FnMut(f32, f32) + 'static) -> Self {
 		self.on_click = Some(Box::new(on_click));
 		self
@@ -60,23 +65,29 @@ impl Widget for Button {
 		canvas.draw_rect(rect, &paint);
 	}
 
-	fn handle_event(&mut self, event: Event) -> bool {
+	fn handle_event(&mut self, event: Event, layout: &SolvedLayout) -> bool {
 		if self.enabled.get() {
 			match event {
 				Event::Clicked(x, y) => {
-					if let Some(on_click) = self.on_click.as_mut() {
-						(on_click)(x, y);
+					if layout.contains(x, y) {
+						if let Some(on_click) = self.on_click.as_mut() {
+							println!("clicked button {:?}", &self.text);
+							(on_click)(x, y);
+						}
+						true
+					} else {
+						false
 					}
 				}
 				Event::HoverStart => {
 					self.hovered = true;
+					true
 				}
 				Event::HoverEnd => {
 					self.hovered = false;
+					false
 				}
 			}
-
-			true
 		} else {
 			false
 		}

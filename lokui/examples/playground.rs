@@ -1,132 +1,115 @@
 #![allow(clippy::unusual_byte_groupings)]
 
-use std::ops::Deref;
-
 use lokui::components::button::button;
-// use lokui::components::number::number;
 use lokui::components::pane::{pane, Pane};
 use lokui::layout::{Anchor, DimScalar, Layout, Padding, SolvedLayout};
-// use lokui::components::text::text;
 use lokui::lazy::Laz;
 use lokui::widget::{Event, Widget};
 use miniquad::skia::SkiaContext;
 use miniquad::{conf, EventHandler};
 use skia_safe::Color;
 
-struct Counter {
-	value: Laz<i64>,
-	layout: Layout,
-	inner: Pane,
-}
+fn counter() -> Pane {
+	let value = Laz::new(0);
 
-impl Counter {
-	fn new() -> Self {
-		let value = Laz::new(0);
+	let increment = {
+		let value = value.clone();
+		move |_, _| value.set(value.get() + 1)
+	};
 
-		let increment = {
-			let value = value.clone();
-			move |_, _| value.set(value.get() + 1)
-		};
+	let decrement = { move |_, _| value.set(value.get() - 1) };
 
-		// let decrement = {
-		// 	let value = value.clone();
-		// 	move || value.set(value.get() - 1)
-		// };
-
-		let inner = pane()
-			.with_padding(Padding::splat(10.))
-			.with_layout(
-				Layout::new()
-					.with_anchor(Anchor::CENTER)
-					.with_dimension(DimScalar::Fixed(400.), DimScalar::Fixed(250.)),
-			)
-			// .child(text(Lazy::new("Count: ")))
-			// .child(number(value.clone()))
-			.child(
-				pane()
-					.with_padding(Padding::vh(5., 30.))
-					.with_layout(Layout::new().with_dimension(DimScalar::Fill, DimScalar::Fill))
-					.child(button("+1").on_click(increment)),
-				// .child(button("-1").on_click(decrement)),
-			);
-
-		Counter {
-			value,
-			inner,
-			layout: Layout::new(),
-		}
-	}
-
-	fn value(&self) -> &Laz<i64> {
-		&self.value
-	}
-}
-
-impl Deref for Counter {
-	type Target = Pane;
-
-	fn deref(&self) -> &Self::Target {
-		&self.inner
-	}
-}
-
-impl Widget for Counter {
-	fn handle_event(&mut self, event: Event) -> bool {
-		self.inner.handle_event(event)
-	}
-
-	fn layout(&self) -> &Layout {
-		&self.layout
-	}
-
-	fn solve_layout(&mut self, parent_layout: &SolvedLayout) -> SolvedLayout {
-		self.inner.solve_layout(parent_layout)
-	}
-
-	fn draw(&self, skia_ctx: &mut SkiaContext, layout: &SolvedLayout) {
-		self.inner.draw(skia_ctx, layout);
-	}
+	pane()
+		.with_padding(Padding::splat(10.))
+		.with_layout(
+			Layout::new()
+				.with_anchor(Anchor::CENTER)
+				.with_dimension(DimScalar::Fixed(400.), DimScalar::Fixed(250.)),
+		)
+		.child(
+			pane()
+				.with_padding(Padding::vh(5., 30.))
+				.with_layout(Layout::new().with_dimension(DimScalar::Fill, DimScalar::Fill))
+				.child(
+					button("+1")
+						.with_layout(
+							Layout::new()
+								.with_dimension(DimScalar::Fixed(80.), DimScalar::Fixed(50.))
+								.with_anchor(Anchor::TOP_RIGHT),
+						)
+						.on_click(increment),
+				)
+				.child(
+					button("-1")
+						.with_layout(
+							Layout::new()
+								.with_dimension(DimScalar::Fixed(80.), DimScalar::Fixed(50.))
+								.with_anchor(Anchor::BOTTOM_RIGHT),
+						)
+						.on_click(decrement),
+				),
+		)
 }
 
 struct Stage {
-	counter: Counter,
+	root_pane: Pane,
+	root_layout: SolvedLayout,
 	window_layout: SolvedLayout,
-	counter_layout: SolvedLayout,
 }
 
 impl EventHandler for Stage {
 	fn update(&mut self, _skia_ctx: &mut SkiaContext) {}
 
+	fn mouse_button_up_event(
+		&mut self,
+		_skia_ctx: &mut SkiaContext,
+		_button: miniquad::MouseButton,
+		x: f32,
+		y: f32,
+	) {
+		self.root_pane
+			.handle_event(Event::Clicked(x, y), &self.root_layout);
+	}
+
+	fn resize_event(&mut self, skia_ctx: &mut SkiaContext, width: f32, height: f32) {
+		self.window_layout = SolvedLayout::from_top_left(0., 0., width, height);
+		self.root_layout = self.root_pane.solve_layout(&self.window_layout);
+		skia_ctx.recreate_surface(width as i32, height as i32);
+	}
+
 	fn draw(&mut self, skia_ctx: &mut SkiaContext) {
+		println!("drawing from window {:?} [", &self.window_layout);
+
 		let canvas = &mut skia_ctx.surface.canvas();
 		canvas.clear(Color::from(0xff_161a1d));
 
-		self.counter.draw(skia_ctx, &self.counter_layout);
+		self.root_pane.draw(skia_ctx, &self.root_layout);
 
 		skia_ctx.dctx.flush(None);
+
+		println!("]");
 	}
 }
 
 fn main() {
-	let mut counter = Counter::new();
-	let window_layout =
-		SolvedLayout::from_top_left(0., 0., 1280., 720.).padded(Padding::splat(20.));
-	let counter_layout = counter.solve_layout(&window_layout);
+	let mut root_pane = counter();
+	let window_layout = SolvedLayout::from_top_left(0., 0., 1280., 720.);
+	let root_layout = root_pane.solve_layout(&window_layout);
 
 	miniquad::start(
 		conf::Conf {
 			high_dpi: true,
 			window_width: 1280,
 			window_height: 720,
-			window_resizable: false,
+			// window_resizable: false,
 			window_title: "Lokui GUI Framework Prototype".to_owned(),
 			..Default::default()
 		},
 		move || {
 			Box::new(Stage {
-				counter,
+				root_pane,
+				root_layout,
 				window_layout,
-				counter_layout,
 			})
 		},
 	);
