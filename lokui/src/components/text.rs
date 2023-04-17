@@ -1,8 +1,10 @@
 use std::fmt::Display;
+use std::io;
 
 use miniquad::skia::SkiaContext;
 use skia_safe::{Color, Font, Paint, Rect};
 
+use crate::indentation;
 use crate::layout::{Anchor, Layout, SolvedLayout};
 use crate::lazy::Lazy;
 use crate::widget::{Event, Widget};
@@ -55,6 +57,15 @@ impl<T: Display> Widget for Text<T> {
 
 	fn min_height(&self) -> f32 {
 		self.min_bounds().height()
+	}
+
+	fn debug(&self, w: &mut dyn io::Write, deepness: usize) -> io::Result<()> {
+		writeln!(
+			w,
+			"{}<text>{}</text>",
+			indentation(deepness),
+			&self.text,
+		)
 	}
 
 	fn draw(&self, skia_ctx: &mut SkiaContext, layout: &SolvedLayout) {
