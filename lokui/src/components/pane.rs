@@ -1,6 +1,9 @@
+use std::io;
+
 use miniquad::skia::SkiaContext;
 use skia_safe::{Color, Paint, Rect};
 
+use crate::indentation;
 use crate::layout::{DimScalar, Direction, FlexLayout, Layout, Padding, SolvedLayout};
 use crate::widget::{Event, Widget};
 
@@ -129,6 +132,14 @@ impl Widget for Pane {
 			.unwrap_or_default();
 
 		inner_min_height + height_pad
+	}
+
+	fn debug(&self, w: &mut dyn io::Write, deepness: usize) -> io::Result<()> {
+		writeln!(w, "{}<pane>", indentation(deepness))?;
+		for child in &self.children {
+			child.widget.debug(w, deepness + 1)?;
+		}
+		writeln!(w, "{}</pane>", indentation(deepness))
 	}
 
 	fn draw(&self, skia_ctx: &mut SkiaContext, layout: &SolvedLayout) {

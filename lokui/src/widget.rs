@@ -1,3 +1,5 @@
+use std::io;
+
 use miniquad::skia::SkiaContext;
 
 use crate::layout::{DimScalar, Layout, SolvedLayout};
@@ -38,6 +40,10 @@ pub trait Widget {
 	/// Minimum possible height in case we choose DimScalar::Hug as the layout height.
 	fn min_height(&mut self) -> f32 {
 		0.
+	}
+
+	fn debug(&self, _w: &mut dyn io::Write, _deepness: usize) -> io::Result<()> {
+		Ok(())
 	}
 
 	fn draw(&self, skia_ctx: &mut SkiaContext, layout: &SolvedLayout);

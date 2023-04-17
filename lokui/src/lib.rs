@@ -4,3 +4,7 @@ pub mod components;
 pub mod layout;
 pub mod lazy;
 pub mod widget;
+
+pub fn indentation(n: usize) -> String {
+	"  ".repeat(n)
+}

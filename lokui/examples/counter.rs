@@ -1,5 +1,7 @@
 #![allow(clippy::unusual_byte_groupings)]
 
+use std::io::{BufWriter, stdout, Write};
+
 use lokui::components::button::button;
 use lokui::components::pane::{pane, Pane};
 use lokui::layout::{Anchor, DimScalar, Layout, Padding, SolvedLayout};
@@ -99,6 +101,10 @@ fn main() {
 	let mut root_pane = counter();
 	let window_layout = SolvedLayout::from_top_left(0., 0., 1280., 720.);
 	let root_layout = root_pane.solve_layout(&window_layout);
+
+	let mut writer = BufWriter::new(stdout());
+	root_pane.debug(&mut writer, 0).unwrap();
+	writer.flush().unwrap();
 
 	miniquad::start(
 		conf::Conf {

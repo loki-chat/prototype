@@ -1,6 +1,9 @@
+use std::io;
+
 use miniquad::skia::SkiaContext;
 use skia_safe::{Color, Paint, Rect};
 
+use crate::indentation;
 use crate::layout::{Layout, SolvedLayout};
 use crate::lazy::Laz;
 use crate::widget::{Event, Widget};
@@ -40,6 +43,10 @@ impl Widget for Button {
 
 	fn min_height(&mut self) -> f32 {
 		15.
+	}
+
+	fn debug(&self, w: &mut dyn io::Write, deepness: usize) -> io::Result<()> {
+		writeln!(w, "{}<button>{}</button>", indentation(deepness), &self.text)
 	}
 
 	fn draw(&self, skia_ctx: &mut SkiaContext, layout: &SolvedLayout) {
