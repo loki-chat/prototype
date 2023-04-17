@@ -77,7 +77,6 @@ impl Widget for Pane {
 
 			for child in &mut self.children {
 				child.solved_layout = child.widget.solve_layout(&inner_layout);
-				println!("solved child layout: {:?}", &child.solved_layout);
 			}
 		}
 
