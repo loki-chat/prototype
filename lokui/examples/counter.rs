@@ -131,7 +131,6 @@ fn main() {
 			high_dpi: true,
 			window_width: 1280,
 			window_height: 720,
-			// window_resizable: false,
 			window_title: "Lokui GUI Framework Prototype".to_owned(),
 			..Default::default()
 		},

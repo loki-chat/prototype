@@ -1,7 +1,7 @@
 use std::fmt::Display;
 use std::io;
 
-use skia_safe::{Color, Font, Paint, Rect, Canvas};
+use skia_safe::{Canvas, Color, Font, Paint, Rect};
 
 use crate::indentation;
 use crate::layout::{Anchor, Layout, SolvedLayout};
@@ -12,7 +12,6 @@ pub struct Text<T: Display> {
 	layout: Layout,
 	font: Lazy<Font>,
 	text: T,
-	// min_bounds: Rect,
 }
 
 pub fn text<T: Display>(text: T, font: Lazy<Font>) -> Text<T> {
@@ -20,7 +19,6 @@ pub fn text<T: Display>(text: T, font: Lazy<Font>) -> Text<T> {
 		layout: Layout::hug(),
 		font,
 		text,
-		// min_bounds: Rect::default(),
 	}
 }
 
@@ -59,12 +57,7 @@ impl<T: Display> Widget for Text<T> {
 	}
 
 	fn debug(&self, w: &mut dyn io::Write, deepness: usize) -> io::Result<()> {
-		writeln!(
-			w,
-			"{}<text>{}</text>",
-			indentation(deepness),
-			&self.text,
-		)
+		writeln!(w, "{}<text>{}</text>", indentation(deepness), &self.text)
 	}
 
 	fn draw(&self, canvas: &mut Canvas, layout: &SolvedLayout) {

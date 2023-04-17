@@ -1,6 +1,6 @@
 use std::io;
 
-use skia_safe::{Color, Paint, Rect, Canvas};
+use skia_safe::{Canvas, Color, Paint, Rect};
 
 use crate::indentation;
 use crate::layout::{DimScalar, Direction, FlexLayout, Layout, Padding, SolvedLayout};

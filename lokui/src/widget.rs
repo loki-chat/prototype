@@ -1,6 +1,5 @@
 use std::io;
 
-use miniquad::skia::SkiaContext;
 use skia_safe::Canvas;
 
 use crate::layout::{DimScalar, Layout, SolvedLayout};
