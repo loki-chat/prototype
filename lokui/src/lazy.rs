@@ -29,6 +29,12 @@ impl<T> Clone for Lazy<T> {
 	}
 }
 
+impl<T: Copy + fmt::Display> fmt::Display for Lazy<T> {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		self.get().fmt(f)
+	}
+}
+
 pub struct Laz<T: Copy>(Rc<Cell<T>>);
 
 pub fn laz<T: Copy>(val: T) -> Laz<T> {
