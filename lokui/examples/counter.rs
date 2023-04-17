@@ -58,7 +58,7 @@ fn counter() -> Pane {
 								.with_origin(Anchor::CENTER)
 								.with_anchor(Anchor::CENTER),
 						)
-						.child(text(value, font.clone()).with_layout(Layout::hug())),
+						.child(text(value, font.clone())),
 				)
 				.child(
 					button(text("+1", font.clone()))
