@@ -14,10 +14,18 @@ fn counter() -> Pane {
 
 	let increment = {
 		let value = value.clone();
-		move |_, _| value.set(value.get() + 1)
+		move |_, _| {
+			value.set(value.get() + 1);
+			println!("+1! Counter = {}", value.get());
+		}
 	};
 
-	let decrement = { move |_, _| value.set(value.get() - 1) };
+	let decrement = {
+		move |_, _| {
+			value.set(value.get() - 1);
+			println!("-1! Counter = {}", value.get());
+		}
+	};
 
 	pane()
 		.with_padding(Padding::splat(10.))
