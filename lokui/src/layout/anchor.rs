@@ -1,6 +1,6 @@
 use super::SolvedLayout;
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug)]
 pub struct Anchor {
 	pub x: f32,
 	pub y: f32,
@@ -36,5 +36,11 @@ impl Anchor {
 			width,
 			height,
 		}
+	}
+}
+
+impl Default for Anchor {
+	fn default() -> Self {
+		Self::CENTER
 	}
 }

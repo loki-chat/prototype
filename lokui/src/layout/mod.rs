@@ -91,6 +91,10 @@ impl SolvedLayout {
 		}
 	}
 
+	pub fn from_origin(origin: Anchor, x: f32, y: f32, width: f32, height: f32) -> Self {
+		Self::from_top_left(x, y, width, height).anchored(origin)
+	}
+
 	pub fn from_2_points(xa: f32, ya: f32, xb: f32, yb: f32) -> Self {
 		Self {
 			x: xa.min(xb),
@@ -98,6 +102,18 @@ impl SolvedLayout {
 			width: (xb - xa).abs(),
 			height: (yb - ya).abs(),
 		}
+	}
+
+	pub fn x_at_anchor(&self, anchor: Anchor) -> f32 {
+		self.x + self.width * anchor.x
+	}
+
+	pub fn y_at_anchor(&self, anchor: Anchor) -> f32 {
+		self.y + self.height * anchor.y
+	}
+
+	pub fn point_at_anchor(&self, anchor: Anchor) -> (f32, f32) {
+		(self.x_at_anchor(anchor), self.y_at_anchor(anchor))
 	}
 
 	pub fn x_start(&self) -> f32 {
@@ -136,13 +152,18 @@ impl SolvedLayout {
 		self.contains_x(x) && self.contains_y(y)
 	}
 
-	pub fn padded(&self, padding: Padding) -> Self {
-		Self {
-			x: self.x + padding.left,
-			y: self.y + padding.top,
-			width: self.width - padding.left - padding.right,
-			height: self.height - padding.top - padding.bottom,
-		}
+	pub fn padded(mut self, padding: Padding) -> Self {
+		self.x += padding.left;
+		self.y += padding.top;
+		self.width -= padding.left + padding.right;
+		self.height -= padding.top + padding.bottom;
+		self
+	}
+
+	pub fn anchored(mut self, anchor: Anchor) -> Self {
+		self.x -= self.width * anchor.x;
+		self.y -= self.height * anchor.y;
+		self
 	}
 }
 

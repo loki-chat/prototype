@@ -27,7 +27,8 @@ pub trait Widget {
 			DimScalar::Fixed(h) => h,
 		};
 
-		(self.layout().anchor).calc_child_abs_pos(width, height, parent_layout)
+		let (x, y) = parent_layout.point_at_anchor(self.layout().anchor);
+		SolvedLayout::from_origin(self.layout().origin, x, y, width, height)
 	}
 
 	fn solve_layout(&mut self, parent_layout: &SolvedLayout) -> SolvedLayout;

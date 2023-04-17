@@ -1,6 +1,6 @@
 #![allow(clippy::unusual_byte_groupings)]
 
-use std::io::{BufWriter, stdout, Write};
+use std::io::{stdout, BufWriter, Write};
 
 use lokui::components::button::button;
 use lokui::components::pane::{pane, Pane};
@@ -45,6 +45,7 @@ fn counter() -> Pane {
 						.with_layout(
 							Layout::new()
 								.with_dimension(DimScalar::Fixed(80.), DimScalar::Fixed(50.))
+								.with_origin(Anchor::TOP_RIGHT)
 								.with_anchor(Anchor::TOP_RIGHT),
 						)
 						.on_click(increment),
@@ -54,6 +55,7 @@ fn counter() -> Pane {
 						.with_layout(
 							Layout::new()
 								.with_dimension(DimScalar::Fixed(80.), DimScalar::Fixed(50.))
+								.with_origin(Anchor::BOTTOM_RIGHT)
 								.with_anchor(Anchor::BOTTOM_RIGHT),
 						)
 						.on_click(decrement),
