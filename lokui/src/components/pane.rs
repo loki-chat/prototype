@@ -178,7 +178,6 @@ impl Widget for Pane {
 		};
 
 		if should_handle {
-			println!("we do handle the event");
 			for child in &mut self.children {
 				handled |= child.widget.handle_event(event, &child.solved_layout);
 

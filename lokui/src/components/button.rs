@@ -78,7 +78,6 @@ impl Widget for Button {
 				Event::Clicked(x, y) => {
 					if layout.contains(x, y) {
 						if let Some(on_click) = self.on_click.as_mut() {
-							println!("clicked button {:?}", &self.text);
 							(on_click)(x, y);
 						}
 						true
