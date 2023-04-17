@@ -4,15 +4,16 @@ use std::io::{stdout, BufWriter, Write};
 
 use lokui::components::button::button;
 use lokui::components::pane::{pane, Pane};
+use lokui::components::text::text;
 use lokui::layout::{Anchor, DimScalar, Layout, Padding, SolvedLayout};
-use lokui::lazy::Laz;
+use lokui::lazy::{laz, lazy};
 use lokui::widget::{Event, Widget};
 use miniquad::skia::SkiaContext;
 use miniquad::{conf, EventHandler};
-use skia_safe::Color;
+use skia_safe::{Color, Font, FontStyle, Typeface};
 
 fn counter() -> Pane {
-	let value = Laz::new(0);
+	let value = laz(0);
 
 	let increment = {
 		let value = value.clone();
@@ -23,11 +24,15 @@ fn counter() -> Pane {
 	};
 
 	let decrement = {
+		let value = value.clone();
 		move |_, _| {
 			value.set(value.get() - 1);
 			println!("-1! Counter = {}", value.get());
 		}
 	};
+
+	let typeface = Typeface::new("Torus Pro", FontStyle::normal()).unwrap();
+	let font = lazy(Font::new(typeface, Some(20.)));
 
 	pane()
 		.with_padding(Padding::splat(10.))
@@ -41,7 +46,14 @@ fn counter() -> Pane {
 				.with_padding(Padding::vh(5., 30.))
 				.with_layout(Layout::new().with_dimension(DimScalar::Fill, DimScalar::Fill))
 				.child(
-					button("+1")
+					text(value, font.clone()).with_layout(
+						Layout::hug()
+							.with_origin(Anchor::CENTER_LEFT)
+							.with_anchor(Anchor::CENTER_LEFT),
+					),
+				)
+				.child(
+					button(text("+1", font.clone()))
 						.with_layout(
 							Layout::new()
 								.with_dimension(DimScalar::Fixed(80.), DimScalar::Fixed(50.))
@@ -51,7 +63,7 @@ fn counter() -> Pane {
 						.on_click(increment),
 				)
 				.child(
-					button("-1")
+					button(text("-1", font))
 						.with_layout(
 							Layout::new()
 								.with_dimension(DimScalar::Fixed(80.), DimScalar::Fixed(50.))

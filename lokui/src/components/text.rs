@@ -1,26 +1,78 @@
-use crate::layout::{SolvedLayout, Layout};
+use std::fmt::Display;
+
+use miniquad::skia::SkiaContext;
+use skia_safe::{Color, Font, Paint, Rect};
+
+use crate::layout::{Anchor, Layout, SolvedLayout};
 use crate::lazy::Lazy;
 use crate::widget::{Event, Widget};
 
-// pub fn text<T: AsRef<str>>(val: Lazy<T>) -> Text<T> {
-// 	Text(val)
-// }
-
-pub struct Text<T: AsRef<str>> {
+pub struct Text<T: Display> {
 	layout: Layout,
-	text: Lazy<T>,
+	font: Lazy<Font>,
+	text: T,
+	min_bounds: Rect,
 }
 
-impl<T: AsRef<str>> Widget for Text<T> {
+pub fn text<T: Display>(text: T, font: Lazy<Font>) -> Text<T> {
+	Text {
+		layout: Layout::hug(),
+		font,
+		text,
+		min_bounds: Rect::default(),
+	}
+}
+
+impl<T: Display> Text<T> {
+	pub fn with_layout(mut self, layout: Layout) -> Self {
+		self.layout = layout;
+		self
+	}
+
+	pub fn text(&self) -> &T {
+		&self.text
+	}
+}
+
+impl<T: Display> Widget for Text<T> {
 	fn layout(&self) -> &Layout {
 		&self.layout
 	}
 
-	fn draw(&self, layout: SolvedLayout) {
-		// TODO: draw text?
+	fn solve_layout(&mut self, parent_layout: &SolvedLayout) -> SolvedLayout {
+		self.min_bounds = (self.font.get())
+			.measure_str(format!("{}", &self.text), None)
+			.1;
+
+		self.default_solve_layout(parent_layout)
 	}
 
-	fn update(&mut self, _event: Event) -> bool {
+	fn min_width(&mut self) -> f32 {
+		self.min_bounds.width()
+	}
+
+	fn min_height(&mut self) -> f32 {
+		self.min_bounds.height()
+	}
+
+	fn draw(&self, skia_ctx: &mut SkiaContext, layout: &SolvedLayout) {
+		let canvas = skia_ctx.surface.canvas();
+
+		let mut paint = Paint::default();
+		paint.set_anti_alias(true);
+		paint.set_color(Color::from(0xff_ffffff));
+
+		let (x, y) = layout.point_at_anchor(Anchor::TOP_LEFT);
+
+		canvas.draw_str(
+			format!("{}", &self.text),
+			(x, y + self.min_bounds.height()),
+			self.font.get().as_ref(),
+			&paint,
+		);
+	}
+
+	fn handle_event(&mut self, _event: Event, _layout: &SolvedLayout) -> bool {
 		false
 	}
 }

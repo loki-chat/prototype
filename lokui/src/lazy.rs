@@ -1,8 +1,13 @@
 use std::cell::{Cell, Ref, RefCell};
+use std::fmt;
 use std::ops::Deref;
 use std::rc::Rc;
 
 pub struct Lazy<T>(Rc<RefCell<T>>);
+
+pub fn lazy<T>(val: T) -> Lazy<T> {
+	Lazy::new(val)
+}
 
 impl<T> Lazy<T> {
 	pub fn new(val: T) -> Self {
@@ -26,6 +31,10 @@ impl<T> Clone for Lazy<T> {
 
 pub struct Laz<T: Copy>(Rc<Cell<T>>);
 
+pub fn laz<T: Copy>(val: T) -> Laz<T> {
+	Laz::new(val)
+}
+
 impl<T: Copy> Laz<T> {
 	pub fn new(val: T) -> Self {
 		Laz(Rc::new(Cell::new(val)))
@@ -43,5 +52,11 @@ impl<T: Copy> Deref for Laz<T> {
 
 	fn deref(&self) -> &Self::Target {
 		self.0.as_ref()
+	}
+}
+
+impl<T: Copy + fmt::Display> fmt::Display for Laz<T> {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		self.get().fmt(f)
 	}
 }

@@ -1,32 +1,37 @@
+use std::fmt::Display;
 use std::io;
 
 use miniquad::skia::SkiaContext;
 use skia_safe::{Color, Paint, Rect};
 
 use crate::indentation;
-use crate::layout::{Layout, SolvedLayout};
+use crate::layout::{Layout, Padding, SolvedLayout};
 use crate::lazy::Laz;
 use crate::widget::{Event, Widget};
 
-pub struct Button {
+use super::text::Text;
+
+pub struct Button<T: Display> {
 	layout: Layout,
-	text: String,
+	text_layout: SolvedLayout,
+	text: Text<T>,
 	on_click: Option<Box<dyn FnMut(f32, f32)>>,
 	enabled: Laz<bool>,
 	hovered: bool,
 }
 
-pub fn button(text: impl Into<String>) -> Button {
+pub fn button<T: Display>(text: Text<T>) -> Button<T> {
 	Button {
-		layout: Layout::new(),
-		text: text.into(),
+		layout: Layout::hug(),
+		text_layout: SolvedLayout::default(),
+		text,
 		on_click: None,
 		enabled: Laz::new(true),
 		hovered: false,
 	}
 }
 
-impl Button {
+impl<T: Display> Button<T> {
 	pub fn with_layout(mut self, layout: Layout) -> Self {
 		self.layout = layout;
 		self
@@ -38,25 +43,32 @@ impl Button {
 	}
 }
 
-impl Widget for Button {
+impl<T: Display> Widget for Button<T> {
 	fn layout(&self) -> &Layout {
 		&self.layout
 	}
 
 	fn solve_layout(&mut self, parent_layout: &SolvedLayout) -> SolvedLayout {
-		self.default_solve_layout(parent_layout)
+		let layout = self.default_solve_layout(parent_layout);
+		self.text_layout = (self.text).solve_layout(&layout.padded(Padding::vh(5., 10.)));
+		layout
 	}
 
 	fn min_width(&mut self) -> f32 {
-		self.text.len() as f32 * 10.
+		self.text.min_width() + 10.
 	}
 
 	fn min_height(&mut self) -> f32 {
-		15.
+		self.text.min_height() + 5.
 	}
 
 	fn debug(&self, w: &mut dyn io::Write, deepness: usize) -> io::Result<()> {
-		writeln!(w, "{}<button>{}</button>", indentation(deepness), &self.text)
+		writeln!(
+			w,
+			"{}<button>{}</button>",
+			indentation(deepness),
+			self.text.text(),
+		)
 	}
 
 	fn draw(&self, skia_ctx: &mut SkiaContext, layout: &SolvedLayout) {
@@ -80,6 +92,8 @@ impl Widget for Button {
 		paint.set_stroke(true);
 		paint.set_color(Color::from(0xff_ff0051));
 		canvas.draw_rect(rect, &paint);
+
+		self.text.draw(skia_ctx, &self.text_layout);
 	}
 
 	fn handle_event(&mut self, event: Event, layout: &SolvedLayout) -> bool {

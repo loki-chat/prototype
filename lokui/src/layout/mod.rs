@@ -37,6 +37,10 @@ impl Layout {
 		Self::default()
 	}
 
+	pub fn hug() -> Self {
+		Self::new().with_dimension(DimScalar::Hug, DimScalar::Hug)
+	}
+
 	pub fn with_pos(mut self, x: f32, y: f32) -> Self {
 		self.x = x;
 		self.y = y;
