@@ -70,13 +70,13 @@ impl Widget for Pane {
 		let layout = self.default_solve_layout(parent_layout);
 
 		let inner_layout = layout.padded(self.padding);
-		if let Some(_auto_layout) = &self.flex_layout {
-			// With auto-layout, all children are placed next to each other, vertically or horizontally.
+		if let Some(_flex_layout) = &self.flex_layout {
+			// With flex-layout, all children are placed next to each other, vertically or horizontally.
 
 			// for child in &mut self.children {}
-			todo!("no auto-layout for now");
+			todo!("no flex-layout for now");
 		} else {
-			// Without auto-layout, all children are superposed to each other.
+			// Without flex-layout, all children are superposed to each other.
 
 			for child in &mut self.children {
 				child.solved_layout = child.widget.solve_layout(&inner_layout);
@@ -89,8 +89,8 @@ impl Widget for Pane {
 	fn min_width(&mut self) -> f32 {
 		let width_pad = self.padding.left + self.padding.right;
 
-		if let Some(auto_layout) = self.flex_layout.as_ref() {
-			if auto_layout.direction == Direction::Horizontal {
+		if let Some(flex_layout) = self.flex_layout.as_ref() {
+			if flex_layout.direction == Direction::Horizontal {
 				let inner_min_width: f32 = (self.children.iter_mut())
 					.map(|child| match child.widget.layout().width {
 						DimScalar::Fixed(w) => w,
@@ -113,8 +113,8 @@ impl Widget for Pane {
 	fn min_height(&mut self) -> f32 {
 		let height_pad = self.padding.top + self.padding.bottom;
 
-		if let Some(auto_layout) = self.flex_layout.as_ref() {
-			if auto_layout.direction == Direction::Vertical {
+		if let Some(flex_layout) = self.flex_layout.as_ref() {
+			if flex_layout.direction == Direction::Vertical {
 				let inner_min_height: f32 = (self.children.iter_mut())
 					.map(|child| match child.widget.layout().height {
 						DimScalar::Fixed(h) => h,
