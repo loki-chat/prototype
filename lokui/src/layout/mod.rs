@@ -16,6 +16,18 @@ pub enum DimScalar {
 	Fixed(f32),
 }
 
+impl DimScalar {
+	pub fn is_fill(&self) -> bool {
+		matches!(self, Self::Fill)
+	}
+	pub fn is_hug(&self) -> bool {
+		matches!(self, Self::Hug)
+	}
+	pub fn is_fixed(&self) -> bool {
+		matches!(self, Self::Fixed(_))
+	}
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct Layout {
 	/// Position offset in pixels on the `x` axis.
@@ -167,6 +179,32 @@ impl SolvedLayout {
 	pub fn anchored(mut self, anchor: Anchor) -> Self {
 		self.x -= self.width * anchor.x;
 		self.y -= self.height * anchor.y;
+		self
+	}
+
+	pub fn with_dimensions(mut self, width: f32, height: f32) -> Self {
+		self.width = width;
+		self.height = height;
+		self
+	}
+
+	pub fn with_width(mut self, width: f32) -> Self {
+		self.width = width;
+		self
+	}
+
+	pub fn with_height(mut self, height: f32) -> Self {
+		self.height = height;
+		self
+	}
+
+	pub fn with_x(mut self, x: f32) -> Self {
+		self.x = x;
+		self
+	}
+
+	pub fn with_y(mut self, y: f32) -> Self {
+		self.y = y;
 		self
 	}
 }

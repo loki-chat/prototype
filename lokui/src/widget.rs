@@ -34,12 +34,12 @@ pub trait Widget {
 	fn solve_layout(&mut self, parent_layout: &SolvedLayout) -> SolvedLayout;
 
 	/// Minimum possible width in case we choose DimScalar::Hug as the layout width.
-	fn min_width(&mut self) -> f32 {
+	fn min_width(&self) -> f32 {
 		0.
 	}
 
 	/// Minimum possible height in case we choose DimScalar::Hug as the layout height.
-	fn min_height(&mut self) -> f32 {
+	fn min_height(&self) -> f32 {
 		0.
 	}
 

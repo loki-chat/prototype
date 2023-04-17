@@ -5,7 +5,7 @@ use std::io::{stdout, BufWriter, Write};
 use lokui::components::button::button;
 use lokui::components::pane::{pane, Pane};
 use lokui::components::text::text;
-use lokui::layout::{Anchor, DimScalar, Layout, Padding, SolvedLayout};
+use lokui::layout::{Anchor, DimScalar, Direction, FlexLayout, Layout, Padding, SolvedLayout};
 use lokui::lazy::{laz, lazy};
 use lokui::widget::{Event, Widget};
 use miniquad::skia::SkiaContext;
@@ -43,22 +43,30 @@ fn counter() -> Pane {
 		)
 		.child(
 			pane()
-				.with_padding(Padding::vh(5., 30.))
+				.with_padding(Padding::vh(5., 10.))
+				.with_flex_layout(FlexLayout {
+					direction: Direction::Horizontal,
+					align: Anchor::CENTER_LEFT,
+					gap: 0.,
+				})
 				.with_layout(Layout::new().with_dimension(DimScalar::Fill, DimScalar::Fill))
 				.child(
-					text(value, font.clone()).with_layout(
-						Layout::hug()
-							.with_origin(Anchor::CENTER_LEFT)
-							.with_anchor(Anchor::CENTER_LEFT),
-					),
+					pane()
+						.with_layout(
+							Layout::new()
+								.with_dimension(DimScalar::Fixed(120.), DimScalar::Fixed(50.))
+								.with_origin(Anchor::CENTER)
+								.with_anchor(Anchor::CENTER),
+						)
+						.child(text(value, font.clone()).with_layout(Layout::hug())),
 				)
 				.child(
 					button(text("+1", font.clone()))
 						.with_layout(
 							Layout::new()
 								.with_dimension(DimScalar::Fixed(80.), DimScalar::Fixed(50.))
-								.with_origin(Anchor::TOP_RIGHT)
-								.with_anchor(Anchor::TOP_RIGHT),
+								.with_origin(Anchor::CENTER_LEFT)
+								.with_anchor(Anchor::CENTER_LEFT),
 						)
 						.on_click(increment),
 				)
@@ -67,8 +75,8 @@ fn counter() -> Pane {
 						.with_layout(
 							Layout::new()
 								.with_dimension(DimScalar::Fixed(80.), DimScalar::Fixed(50.))
-								.with_origin(Anchor::BOTTOM_RIGHT)
-								.with_anchor(Anchor::BOTTOM_RIGHT),
+								.with_origin(Anchor::CENTER_LEFT)
+								.with_anchor(Anchor::CENTER_LEFT),
 						)
 						.on_click(decrement),
 				),

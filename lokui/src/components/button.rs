@@ -54,11 +54,11 @@ impl<T: Display> Widget for Button<T> {
 		layout
 	}
 
-	fn min_width(&mut self) -> f32 {
+	fn min_width(&self) -> f32 {
 		self.text.min_width() + 10.
 	}
 
-	fn min_height(&mut self) -> f32 {
+	fn min_height(&self) -> f32 {
 		self.text.min_height() + 5.
 	}
 

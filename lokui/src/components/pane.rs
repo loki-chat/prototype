@@ -70,11 +70,79 @@ impl Widget for Pane {
 		let layout = self.default_solve_layout(parent_layout);
 
 		let inner_layout = layout.padded(self.padding);
-		if let Some(_flex_layout) = &self.flex_layout {
+		if let Some(flex_layout) = &self.flex_layout {
 			// With flex-layout, all children are placed next to each other, vertically or horizontally.
 
-			// for child in &mut self.children {}
-			todo!("no flex-layout for now");
+			match flex_layout.direction {
+				Direction::Horizontal => {
+					let fills_count = (self.children.iter())
+						.filter(|child| child.widget.layout().width.is_fill())
+						.count();
+
+					let filling_width = if fills_count == 0 {
+						0.
+					} else {
+						let fixed_width: f32 = (self.children.iter())
+							.filter_map(|child| match child.widget.layout().width {
+								DimScalar::Fill => None,
+								DimScalar::Hug => Some(child.widget.min_width()),
+								DimScalar::Fixed(w) => Some(w),
+							})
+							.sum();
+
+						let leftover_width = (inner_layout.width() - fixed_width).max(0.);
+						leftover_width / fills_count as f32
+					};
+
+					let mut x = inner_layout.x_start();
+					for child in &mut self.children {
+						let child_width = match child.widget.layout().width {
+							DimScalar::Fill => filling_width,
+							DimScalar::Hug => child.widget.min_width(),
+							DimScalar::Fixed(w) => w,
+						};
+
+						let inner_layout = inner_layout.with_width(child_width).with_x(x);
+						child.solved_layout = child.widget.solve_layout(&inner_layout);
+
+						x += child_width;
+					}
+				}
+				Direction::Vertical => {
+					let fills_count = (self.children.iter())
+						.filter(|child| child.widget.layout().height.is_fill())
+						.count();
+
+					let filling_height = if fills_count == 0 {
+						0.
+					} else {
+						let fixed_height: f32 = (self.children.iter())
+							.filter_map(|child| match child.widget.layout().height {
+								DimScalar::Fill => None,
+								DimScalar::Hug => Some(child.widget.min_height()),
+								DimScalar::Fixed(w) => Some(w),
+							})
+							.sum();
+
+						let leftover_height = (inner_layout.height() - fixed_height).max(0.);
+						leftover_height / fills_count as f32
+					};
+
+					let mut y = inner_layout.y_start();
+					for child in &mut self.children {
+						let child_height = match child.widget.layout().height {
+							DimScalar::Fill => filling_height,
+							DimScalar::Hug => child.widget.min_height(),
+							DimScalar::Fixed(w) => w,
+						};
+
+						let inner_layout = inner_layout.with_height(child_height).with_y(y);
+						child.solved_layout = child.widget.solve_layout(&inner_layout);
+
+						y += child_height;
+					}
+				}
+			}
 		} else {
 			// Without flex-layout, all children are superposed to each other.
 
@@ -86,12 +154,12 @@ impl Widget for Pane {
 		layout
 	}
 
-	fn min_width(&mut self) -> f32 {
+	fn min_width(&self) -> f32 {
 		let width_pad = self.padding.left + self.padding.right;
 
 		if let Some(flex_layout) = self.flex_layout.as_ref() {
 			if flex_layout.direction == Direction::Horizontal {
-				let inner_min_width: f32 = (self.children.iter_mut())
+				let inner_min_width: f32 = (self.children.iter())
 					.map(|child| match child.widget.layout().width {
 						DimScalar::Fixed(w) => w,
 						_ => child.widget.min_width(),
@@ -102,7 +170,7 @@ impl Widget for Pane {
 			}
 		}
 
-		let inner_min_width = (self.children.iter_mut())
+		let inner_min_width = (self.children.iter())
 			.map(|child| child.widget.min_width())
 			.max_by(|x, y| x.total_cmp(y))
 			.unwrap_or_default();
@@ -110,12 +178,12 @@ impl Widget for Pane {
 		inner_min_width + width_pad
 	}
 
-	fn min_height(&mut self) -> f32 {
+	fn min_height(&self) -> f32 {
 		let height_pad = self.padding.top + self.padding.bottom;
 
 		if let Some(flex_layout) = self.flex_layout.as_ref() {
 			if flex_layout.direction == Direction::Vertical {
-				let inner_min_height: f32 = (self.children.iter_mut())
+				let inner_min_height: f32 = (self.children.iter())
 					.map(|child| match child.widget.layout().height {
 						DimScalar::Fixed(h) => h,
 						_ => child.widget.min_height(),
@@ -126,7 +194,7 @@ impl Widget for Pane {
 			}
 		}
 
-		let inner_min_height = (self.children.iter_mut())
+		let inner_min_height = (self.children.iter())
 			.map(|child| child.widget.min_height())
 			.max_by(|x, y| x.total_cmp(y))
 			.unwrap_or_default();

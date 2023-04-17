@@ -11,7 +11,7 @@ pub struct Text<T: Display> {
 	layout: Layout,
 	font: Lazy<Font>,
 	text: T,
-	min_bounds: Rect,
+	// min_bounds: Rect,
 }
 
 pub fn text<T: Display>(text: T, font: Lazy<Font>) -> Text<T> {
@@ -19,7 +19,7 @@ pub fn text<T: Display>(text: T, font: Lazy<Font>) -> Text<T> {
 		layout: Layout::hug(),
 		font,
 		text,
-		min_bounds: Rect::default(),
+		// min_bounds: Rect::default(),
 	}
 }
 
@@ -32,6 +32,12 @@ impl<T: Display> Text<T> {
 	pub fn text(&self) -> &T {
 		&self.text
 	}
+
+	pub fn min_bounds(&self) -> Rect {
+		(self.font.get())
+			.measure_str(format!("{}", &self.text), None)
+			.1
+	}
 }
 
 impl<T: Display> Widget for Text<T> {
@@ -40,19 +46,15 @@ impl<T: Display> Widget for Text<T> {
 	}
 
 	fn solve_layout(&mut self, parent_layout: &SolvedLayout) -> SolvedLayout {
-		self.min_bounds = (self.font.get())
-			.measure_str(format!("{}", &self.text), None)
-			.1;
-
 		self.default_solve_layout(parent_layout)
 	}
 
-	fn min_width(&mut self) -> f32 {
-		self.min_bounds.width()
+	fn min_width(&self) -> f32 {
+		self.min_bounds().width()
 	}
 
-	fn min_height(&mut self) -> f32 {
-		self.min_bounds.height()
+	fn min_height(&self) -> f32 {
+		self.min_bounds().height()
 	}
 
 	fn draw(&self, skia_ctx: &mut SkiaContext, layout: &SolvedLayout) {
@@ -66,7 +68,7 @@ impl<T: Display> Widget for Text<T> {
 
 		canvas.draw_str(
 			format!("{}", &self.text),
-			(x, y + self.min_bounds.height()),
+			(x, y + self.min_bounds().height()),
 			self.font.get().as_ref(),
 			&paint,
 		);
