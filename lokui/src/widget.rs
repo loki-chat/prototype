@@ -1,6 +1,7 @@
 use std::io;
 
 use miniquad::skia::SkiaContext;
+use skia_safe::Canvas;
 
 use crate::layout::{DimScalar, Layout, SolvedLayout};
 
@@ -47,6 +48,6 @@ pub trait Widget {
 		Ok(())
 	}
 
-	fn draw(&self, skia_ctx: &mut SkiaContext, layout: &SolvedLayout);
+	fn draw(&self, canvas: &mut Canvas, layout: &SolvedLayout);
 	fn handle_event(&mut self, event: Event, layout: &SolvedLayout) -> bool;
 }

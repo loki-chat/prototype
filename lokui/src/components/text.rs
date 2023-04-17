@@ -1,8 +1,7 @@
 use std::fmt::Display;
 use std::io;
 
-use miniquad::skia::SkiaContext;
-use skia_safe::{Color, Font, Paint, Rect};
+use skia_safe::{Color, Font, Paint, Rect, Canvas};
 
 use crate::indentation;
 use crate::layout::{Anchor, Layout, SolvedLayout};
@@ -68,9 +67,7 @@ impl<T: Display> Widget for Text<T> {
 		)
 	}
 
-	fn draw(&self, skia_ctx: &mut SkiaContext, layout: &SolvedLayout) {
-		let canvas = skia_ctx.surface.canvas();
-
+	fn draw(&self, canvas: &mut Canvas, layout: &SolvedLayout) {
 		let mut paint = Paint::default();
 		paint.set_anti_alias(true);
 		paint.set_color(Color::from(0xff_ffffff));

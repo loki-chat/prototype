@@ -1,8 +1,7 @@
 use std::fmt::Display;
 use std::io;
 
-use miniquad::skia::SkiaContext;
-use skia_safe::{Color, Paint, Rect};
+use skia_safe::{Color, Paint, Rect, Canvas};
 
 use crate::indentation;
 use crate::layout::{Layout, Padding, SolvedLayout};
@@ -71,9 +70,7 @@ impl<T: Display> Widget for Button<T> {
 		)
 	}
 
-	fn draw(&self, skia_ctx: &mut SkiaContext, layout: &SolvedLayout) {
-		let canvas = skia_ctx.surface.canvas();
-
+	fn draw(&self, canvas: &mut Canvas, layout: &SolvedLayout) {
 		let rect = Rect::from_xywh(
 			layout.x_start(),
 			layout.y_start(),
@@ -93,7 +90,7 @@ impl<T: Display> Widget for Button<T> {
 		paint.set_color(Color::from(0xff_ff0051));
 		canvas.draw_rect(rect, &paint);
 
-		self.text.draw(skia_ctx, &self.text_layout);
+		self.text.draw(canvas, &self.text_layout);
 	}
 
 	fn handle_event(&mut self, event: Event, layout: &SolvedLayout) -> bool {

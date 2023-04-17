@@ -110,11 +110,9 @@ impl EventHandler for Stage {
 	}
 
 	fn draw(&mut self, skia_ctx: &mut SkiaContext) {
-		let canvas = &mut skia_ctx.surface.canvas();
+		let canvas = skia_ctx.surface.canvas();
 		canvas.clear(Color::from(0xff_161a1d));
-
-		self.root_pane.draw(skia_ctx, &self.root_layout);
-
+		self.root_pane.draw(canvas, &self.root_layout);
 		skia_ctx.dctx.flush(None);
 	}
 }

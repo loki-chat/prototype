@@ -1,7 +1,6 @@
 use std::io;
 
-use miniquad::skia::SkiaContext;
-use skia_safe::{Color, Paint, Rect};
+use skia_safe::{Color, Paint, Rect, Canvas};
 
 use crate::indentation;
 use crate::layout::{DimScalar, Direction, FlexLayout, Layout, Padding, SolvedLayout};
@@ -215,9 +214,7 @@ impl Widget for Pane {
 		writeln!(w, "{}</pane>", indentation(deepness))
 	}
 
-	fn draw(&self, skia_ctx: &mut SkiaContext, layout: &SolvedLayout) {
-		let canvas = skia_ctx.surface.canvas();
-
+	fn draw(&self, canvas: &mut Canvas, layout: &SolvedLayout) {
 		let rect = Rect::from_xywh(
 			layout.x_start(),
 			layout.y_start(),
@@ -238,7 +235,7 @@ impl Widget for Pane {
 		canvas.draw_rect(rect, &paint);
 
 		for child in &self.children {
-			child.widget.draw(skia_ctx, &child.solved_layout);
+			child.widget.draw(canvas, &child.solved_layout);
 		}
 	}
 
