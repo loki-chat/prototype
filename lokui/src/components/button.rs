@@ -16,6 +16,16 @@ pub struct Button {
 	hovered: bool,
 }
 
+pub fn button(text: impl Into<String>) -> Button {
+	Button {
+		layout: Layout::new(),
+		text: text.into(),
+		on_click: None,
+		enabled: Laz::new(true),
+		hovered: false,
+	}
+}
+
 impl Button {
 	pub fn with_layout(mut self, layout: Layout) -> Self {
 		self.layout = layout;
@@ -97,15 +107,5 @@ impl Widget for Button {
 		} else {
 			false
 		}
-	}
-}
-
-pub fn button(text: impl Into<String>) -> Button {
-	Button {
-		layout: Layout::new(),
-		text: text.into(),
-		on_click: None,
-		enabled: Laz::new(true),
-		hovered: false,
 	}
 }

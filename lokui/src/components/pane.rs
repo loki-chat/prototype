@@ -20,6 +20,10 @@ pub struct Pane {
 	children: Vec<PaneChild>,
 }
 
+pub fn pane() -> Pane {
+	Pane::default()
+}
+
 impl Pane {
 	pub fn with_layout(mut self, layout: Layout) -> Self {
 		self.layout = layout;
@@ -55,10 +59,6 @@ impl Pane {
 	pub fn pop_child(&mut self) -> Option<Box<dyn Widget>> {
 		self.children.pop().map(|child| child.widget)
 	}
-}
-
-pub fn pane() -> Pane {
-	Pane::default()
 }
 
 impl Widget for Pane {
