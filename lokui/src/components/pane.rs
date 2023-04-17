@@ -96,6 +96,8 @@ impl Widget for Pane {
 
 					let mut x = inner_layout.x_start();
 					for child in &mut self.children {
+						// Each child is given a slice of the inner layout.
+
 						let child_width = match child.widget.layout().width {
 							DimScalar::Fill => filling_width,
 							DimScalar::Hug => child.widget.min_width(),
@@ -109,6 +111,9 @@ impl Widget for Pane {
 					}
 				}
 				Direction::Vertical => {
+					// maybe put this into a function since it's
+					// copy-pasted from the Horizontal case but for height?
+
 					let fills_count = (self.children.iter())
 						.filter(|child| child.widget.layout().height.is_fill())
 						.count();

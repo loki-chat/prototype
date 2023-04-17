@@ -54,7 +54,7 @@ fn counter() -> Pane {
 					pane()
 						.with_layout(
 							Layout::new()
-								.with_dimension(DimScalar::Fixed(120.), DimScalar::Fixed(50.))
+								.with_dimension(DimScalar::Fill, DimScalar::Fixed(50.))
 								.with_origin(Anchor::CENTER)
 								.with_anchor(Anchor::CENTER),
 						)
