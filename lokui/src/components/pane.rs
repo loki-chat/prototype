@@ -155,7 +155,6 @@ impl Widget for Pane {
 		canvas.draw_rect(rect, &paint);
 
 		for child in &self.children {
-			println!("  drawing child with {:?}", &child.solved_layout);
 			child.widget.draw(skia_ctx, &child.solved_layout);
 		}
 	}

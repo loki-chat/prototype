@@ -86,16 +86,12 @@ impl EventHandler for Stage {
 	}
 
 	fn draw(&mut self, skia_ctx: &mut SkiaContext) {
-		println!("drawing from window {:?} [", &self.window_layout);
-
 		let canvas = &mut skia_ctx.surface.canvas();
 		canvas.clear(Color::from(0xff_161a1d));
 
 		self.root_pane.draw(skia_ctx, &self.root_layout);
 
 		skia_ctx.dctx.flush(None);
-
-		println!("]");
 	}
 }
 
