@@ -65,8 +65,8 @@ fn counter() -> Pane {
 						.with_layout(
 							Layout::new()
 								.with_dimension(DimScalar::Fixed(80.), DimScalar::Fixed(50.))
-								.with_origin(Anchor::CENTER_LEFT)
-								.with_anchor(Anchor::CENTER_LEFT),
+								.with_origin(Anchor::CENTER)
+								.with_anchor(Anchor::CENTER),
 						)
 						.on_click(increment),
 				)
@@ -75,8 +75,8 @@ fn counter() -> Pane {
 						.with_layout(
 							Layout::new()
 								.with_dimension(DimScalar::Fixed(80.), DimScalar::Fixed(50.))
-								.with_origin(Anchor::CENTER_LEFT)
-								.with_anchor(Anchor::CENTER_LEFT),
+								.with_origin(Anchor::CENTER)
+								.with_anchor(Anchor::CENTER),
 						)
 						.on_click(decrement),
 				),
