@@ -7,4 +7,6 @@ edition = "2021"
 
 [dependencies]
 skia-safe = { version = "0.60.0", features = ["gl"] }
+
+[dev-dependencies]
 miniquad = { git = "https://github.com/loki-chat/lokinit" }
