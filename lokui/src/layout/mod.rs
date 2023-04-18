@@ -219,6 +219,5 @@ pub enum Direction {
 #[derive(Clone, Debug, Default)]
 pub struct FlexLayout {
 	pub direction: Direction,
-	pub align: Anchor,
 	pub gap: f32,
 }
