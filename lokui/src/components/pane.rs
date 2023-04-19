@@ -202,7 +202,8 @@ fn solve_flex_layout(
 					})
 					.sum();
 
-				let leftover_width = (inner_layout.width() - fixed_width).max(0.);
+				let gap_width = flex_layout.gap * children.len().saturating_sub(1) as f32;
+				let leftover_width = (inner_layout.width() - fixed_width - gap_width).max(0.);
 				leftover_width / fills_count as f32
 			};
 
@@ -219,7 +220,7 @@ fn solve_flex_layout(
 				let inner_layout = inner_layout.with_width(child_width).with_x(x);
 				*solved_layout = widget.solve_layout(&inner_layout);
 
-				x += child_width;
+				x += child_width + flex_layout.gap;
 			}
 		}
 		Direction::Vertical => {
@@ -241,7 +242,8 @@ fn solve_flex_layout(
 					})
 					.sum();
 
-				let leftover_height = (inner_layout.height() - fixed_height).max(0.);
+				let gap_width = flex_layout.gap * children.len().saturating_sub(1) as f32;
+				let leftover_height = (inner_layout.height() - fixed_height - gap_width).max(0.);
 				leftover_height / fills_count as f32
 			};
 
@@ -256,7 +258,7 @@ fn solve_flex_layout(
 				let inner_layout = inner_layout.with_height(child_height).with_y(y);
 				*solved_layout = widget.solve_layout(&inner_layout);
 
-				y += child_height;
+				y += child_height + flex_layout.gap;
 			}
 		}
 	}

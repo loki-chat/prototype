@@ -46,7 +46,7 @@ fn counter() -> Pane {
 				.with_padding(Padding::vh(5., 10.))
 				.with_flex_layout(FlexLayout {
 					direction: Direction::Horizontal,
-					gap: 0.,
+					gap: 5.,
 				})
 				.with_layout(Layout::new().with_dimension(DimScalar::Fill, DimScalar::Fill))
 				.child(
