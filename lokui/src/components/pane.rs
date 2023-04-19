@@ -62,83 +62,7 @@ impl Widget for Pane {
 
 		let inner_layout = layout.padded(self.padding);
 		if let Some(flex_layout) = &self.flex_layout {
-			// With flex-layout, all children are placed next to each other, vertically or horizontally.
-
-			match flex_layout.direction {
-				Direction::Horizontal => {
-					let fills_count = (self.children.iter())
-						.filter(|(widget, _)| widget.layout().width.is_fill())
-						.count();
-
-					let filling_width = if fills_count == 0 {
-						0.
-					} else {
-						let fixed_width: f32 = (self.children.iter())
-							.filter_map(|(widget, _)| match widget.layout().width {
-								DimScalar::Fill => None,
-								DimScalar::Hug => Some(widget.min_width()),
-								DimScalar::Fixed(w) => Some(w),
-							})
-							.sum();
-
-						let leftover_width = (inner_layout.width() - fixed_width).max(0.);
-						leftover_width / fills_count as f32
-					};
-
-					let mut x = inner_layout.x_start();
-					for (widget, solved_layout) in &mut self.children {
-						// Each child is given a slice of the inner layout.
-
-						let child_width = match widget.layout().width {
-							DimScalar::Fill => filling_width,
-							DimScalar::Hug => widget.min_width(),
-							DimScalar::Fixed(w) => w,
-						};
-
-						let inner_layout = inner_layout.with_width(child_width).with_x(x);
-						*solved_layout = widget.solve_layout(&inner_layout);
-
-						x += child_width;
-					}
-				}
-				Direction::Vertical => {
-					// maybe put this into a function since it's
-					// copy-pasted from the Horizontal case but for height?
-
-					let fills_count = (self.children.iter())
-						.filter(|(widget, _)| widget.layout().height.is_fill())
-						.count();
-
-					let filling_height = if fills_count == 0 {
-						0.
-					} else {
-						let fixed_height: f32 = (self.children.iter())
-							.filter_map(|(widget, _)| match widget.layout().height {
-								DimScalar::Fill => None,
-								DimScalar::Hug => Some(widget.min_height()),
-								DimScalar::Fixed(w) => Some(w),
-							})
-							.sum();
-
-						let leftover_height = (inner_layout.height() - fixed_height).max(0.);
-						leftover_height / fills_count as f32
-					};
-
-					let mut y = inner_layout.y_start();
-					for (widget, solved_layout) in &mut self.children {
-						let child_height = match widget.layout().height {
-							DimScalar::Fill => filling_height,
-							DimScalar::Hug => widget.min_height(),
-							DimScalar::Fixed(w) => w,
-						};
-
-						let inner_layout = inner_layout.with_height(child_height).with_y(y);
-						*solved_layout = widget.solve_layout(&inner_layout);
-
-						y += child_height;
-					}
-				}
-			}
+			solve_flex_layout(flex_layout, &mut self.children, inner_layout);
 		} else {
 			// Without flex-layout, all children are superposed to each other.
 
@@ -250,5 +174,90 @@ impl Widget for Pane {
 		}
 
 		handled
+	}
+}
+
+/// Solves a pane's children's solved layouts with a flex layout.
+///
+/// With a flex layout, all children are placed next to each other, vertically or horizontally.
+fn solve_flex_layout(
+	flex_layout: &FlexLayout,
+	children: &mut [(Box<dyn Widget>, SolvedLayout)],
+	inner_layout: SolvedLayout,
+) {
+	match flex_layout.direction {
+		Direction::Horizontal => {
+			let fills_count = (children.iter())
+				.filter(|(widget, _)| widget.layout().width.is_fill())
+				.count();
+
+			let filling_width = if fills_count == 0 {
+				0.
+			} else {
+				let fixed_width: f32 = (children.iter())
+					.filter_map(|(widget, _)| match widget.layout().width {
+						DimScalar::Fill => None,
+						DimScalar::Hug => Some(widget.min_width()),
+						DimScalar::Fixed(w) => Some(w),
+					})
+					.sum();
+
+				let leftover_width = (inner_layout.width() - fixed_width).max(0.);
+				leftover_width / fills_count as f32
+			};
+
+			let mut x = inner_layout.x_start();
+			for (widget, solved_layout) in children.iter_mut() {
+				// Each child is given a slice of the inner layout.
+
+				let child_width = match widget.layout().width {
+					DimScalar::Fill => filling_width,
+					DimScalar::Hug => widget.min_width(),
+					DimScalar::Fixed(w) => w,
+				};
+
+				let inner_layout = inner_layout.with_width(child_width).with_x(x);
+				*solved_layout = widget.solve_layout(&inner_layout);
+
+				x += child_width;
+			}
+		}
+		Direction::Vertical => {
+			// maybe put this into a function since it's
+			// copy-pasted from the Horizontal case but for height?
+
+			let fills_count = (children.iter())
+				.filter(|(widget, _)| widget.layout().height.is_fill())
+				.count();
+
+			let filling_height = if fills_count == 0 {
+				0.
+			} else {
+				let fixed_height: f32 = (children.iter())
+					.filter_map(|(widget, _)| match widget.layout().height {
+						DimScalar::Fill => None,
+						DimScalar::Hug => Some(widget.min_height()),
+						DimScalar::Fixed(w) => Some(w),
+					})
+					.sum();
+
+				let leftover_height = (inner_layout.height() - fixed_height).max(0.);
+				leftover_height / fills_count as f32
+			};
+
+			let mut y = inner_layout.y_start();
+			for (widget, solved_layout) in children.iter_mut() {
+				let child_height = match widget.layout().height {
+					DimScalar::Fill => filling_height,
+					DimScalar::Hug => widget.min_height(),
+					DimScalar::Fixed(w) => w,
+				};
+
+				let inner_layout = inner_layout.with_height(child_height).with_y(y);
+				*solved_layout = widget.solve_layout(&inner_layout);
+
+				y += child_height;
+			}
+		}
 	}
 }
