@@ -6,7 +6,7 @@ use skia_safe::{Canvas, Color, Font, Paint, Rect};
 use crate::indentation;
 use crate::layout::{Anchor, Layout, SolvedLayout};
 use crate::lazy::Lazy;
-use crate::widget::{Event, Widget, default_solve_layout};
+use crate::widget::{default_solve_layout, Event, Widget};
 
 pub struct Text<T: Display> {
 	layout: Layout,

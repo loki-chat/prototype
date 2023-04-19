@@ -57,7 +57,10 @@ pub fn solve_height(widget: &dyn Widget) -> Option<f32> {
 }
 
 /// Default function to solve a widget's layout, based on the parent's solved layout.
-pub fn default_solve_layout(widget: &mut impl Widget, parent_layout: &SolvedLayout) -> SolvedLayout {
+pub fn default_solve_layout(
+	widget: &mut impl Widget,
+	parent_layout: &SolvedLayout,
+) -> SolvedLayout {
 	let width = solve_width(widget).unwrap_or_else(|| parent_layout.width());
 	let height = solve_height(widget).unwrap_or_else(|| parent_layout.height());
 
