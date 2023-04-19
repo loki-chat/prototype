@@ -1,6 +1,7 @@
 #![allow(clippy::unusual_byte_groupings)]
 
 pub mod components;
+pub mod events;
 pub mod layout;
 pub mod lazy;
 pub mod widget;

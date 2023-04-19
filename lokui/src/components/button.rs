@@ -3,10 +3,11 @@ use std::io;
 
 use skia_safe::{Canvas, Color, Paint, Rect};
 
+use crate::events::{Event, MousePosition};
 use crate::indentation;
 use crate::layout::{Layout, Padding, SolvedLayout};
 use crate::lazy::Laz;
-use crate::widget::{default_solve_layout, Event, Widget};
+use crate::widget::{default_solve_layout, Widget};
 
 use super::text::Text;
 
@@ -16,6 +17,7 @@ pub struct Button<T: Display> {
 	text: Text<T>,
 	on_click: Option<Box<dyn FnMut(f32, f32)>>,
 	enabled: Laz<bool>,
+	is_mouse_down: bool,
 	hovered: bool,
 }
 
@@ -26,6 +28,7 @@ pub fn button<T: Display>(text: Text<T>) -> Button<T> {
 		text,
 		on_click: None,
 		enabled: Laz::new(true),
+		is_mouse_down: false,
 		hovered: false,
 	}
 }
@@ -82,22 +85,34 @@ impl<T: Display> Widget for Button<T> {
 		paint.set_anti_alias(true);
 		paint.set_stroke_width(2.);
 
+		let color = match (self.enabled.get(), self.is_mouse_down) {
+			(true, true) => 0xa70038,
+			(true, false) if self.hovered => 0xff415a,
+			(true, false) if !self.hovered => 0xff0051,
+			_ => 0x7a4553,
+		};
+
 		paint.set_stroke(false);
-		paint.set_color(Color::from(0x80_ff0051));
+		paint.set_color(Color::from(0x80_000000 | color));
 		canvas.draw_rect(rect, &paint);
 
 		paint.set_stroke(true);
-		paint.set_color(Color::from(0xff_ff0051));
+		paint.set_color(Color::from(0xff_000000 | color));
 		canvas.draw_rect(rect, &paint);
 
 		self.text.draw(canvas, &self.text_layout);
 	}
 
-	fn handle_event(&mut self, event: Event, layout: &SolvedLayout) -> bool {
+	fn handle_event(&mut self, event: Event, _layout: &SolvedLayout) -> bool {
 		if self.enabled.get() {
 			match event {
-				Event::Clicked(x, y) => {
-					if layout.contains(x, y) {
+				Event::MouseDown(_) => {
+					self.is_mouse_down = true;
+					true
+				}
+				Event::MouseUp(MousePosition { x, y }) => {
+					if self.is_mouse_down {
+						self.is_mouse_down = false;
 						if let Some(on_click) = self.on_click.as_mut() {
 							(on_click)(x, y);
 						}
@@ -106,14 +121,16 @@ impl<T: Display> Widget for Button<T> {
 						false
 					}
 				}
-				Event::HoverStart => {
+				Event::MouseIn => {
 					self.hovered = true;
 					true
 				}
-				Event::HoverEnd => {
+				Event::MouseOut => {
 					self.hovered = false;
-					false
+					self.is_mouse_down = false;
+					true
 				}
+				_ => false,
 			}
 		} else {
 			false

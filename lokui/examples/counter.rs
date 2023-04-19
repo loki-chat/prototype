@@ -5,9 +5,10 @@ use std::io::{stdout, BufWriter, Write};
 use lokui::components::button::button;
 use lokui::components::pane::{pane, Pane};
 use lokui::components::text::text;
+use lokui::events::{Event, MousePosition};
 use lokui::layout::{Anchor, DimScalar, Direction, FlexLayout, Layout, Padding, SolvedLayout};
 use lokui::lazy::{laz, lazy};
-use lokui::widget::{Event, Widget};
+use lokui::widget::Widget;
 use miniquad::skia::SkiaContext;
 use miniquad::{conf, EventHandler};
 use skia_safe::{Color, Font, FontStyle, Typeface};
@@ -91,6 +92,17 @@ struct Stage {
 impl EventHandler for Stage {
 	fn update(&mut self, _skia_ctx: &mut SkiaContext) {}
 
+	fn mouse_button_down_event(
+		&mut self,
+		_skia_ctx: &mut SkiaContext,
+		_button: miniquad::MouseButton,
+		x: f32,
+		y: f32,
+	) {
+		let event = Event::MouseDown(MousePosition { x, y });
+		self.root_pane.handle_event(event, &self.root_layout);
+	}
+
 	fn mouse_button_up_event(
 		&mut self,
 		_skia_ctx: &mut SkiaContext,
@@ -98,8 +110,13 @@ impl EventHandler for Stage {
 		x: f32,
 		y: f32,
 	) {
-		self.root_pane
-			.handle_event(Event::Clicked(x, y), &self.root_layout);
+		let event = Event::MouseUp(MousePosition { x, y });
+		self.root_pane.handle_event(event, &self.root_layout);
+	}
+
+	fn mouse_motion_event(&mut self, _skia_ctx: &mut SkiaContext, x: f32, y: f32) {
+		let event = Event::MouseMove(MousePosition { x, y });
+		self.root_pane.handle_event(event, &self.root_layout);
 	}
 
 	fn resize_event(&mut self, skia_ctx: &mut SkiaContext, width: f32, height: f32) {

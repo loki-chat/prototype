@@ -2,14 +2,8 @@ use std::io;
 
 use skia_safe::Canvas;
 
+use crate::events::Event;
 use crate::layout::{DimScalar, Layout, SolvedLayout};
-
-#[derive(Clone, Copy, Debug)]
-pub enum Event {
-	Clicked(f32, f32),
-	HoverStart,
-	HoverEnd,
-}
 
 pub trait Widget {
 	fn layout(&self) -> &Layout;
