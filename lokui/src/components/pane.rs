@@ -4,7 +4,7 @@ use skia_safe::{Canvas, Color, Paint, Rect};
 
 use crate::indentation;
 use crate::layout::{DimScalar, Direction, FlexLayout, Layout, Padding, SolvedLayout};
-use crate::widget::{Event, Widget};
+use crate::widget::{default_solve_layout, solve_height, solve_width, Event, Widget};
 
 #[derive(Default)]
 pub struct Pane {
@@ -58,7 +58,7 @@ impl Widget for Pane {
 	}
 
 	fn solve_layout(&mut self, parent_layout: &SolvedLayout) -> SolvedLayout {
-		let layout = self.default_solve_layout(parent_layout);
+		let layout = default_solve_layout(self, parent_layout);
 
 		let inner_layout = layout.padded(self.padding);
 		if let Some(flex_layout) = &self.flex_layout {
@@ -195,11 +195,7 @@ fn solve_flex_layout(
 				0.
 			} else {
 				let fixed_width: f32 = (children.iter())
-					.filter_map(|(widget, _)| match widget.layout().width {
-						DimScalar::Fill => None,
-						DimScalar::Hug => Some(widget.min_width()),
-						DimScalar::Fixed(w) => Some(w),
-					})
+					.filter_map(|(widget, _)| solve_width(widget.as_ref()))
 					.sum();
 
 				let gap_width = flex_layout.gap * children.len().saturating_sub(1) as f32;
@@ -211,12 +207,7 @@ fn solve_flex_layout(
 			for (widget, solved_layout) in children.iter_mut() {
 				// Each child is given a slice of the inner layout.
 
-				let child_width = match widget.layout().width {
-					DimScalar::Fill => filling_width,
-					DimScalar::Hug => widget.min_width(),
-					DimScalar::Fixed(w) => w,
-				};
-
+				let child_width = solve_width(widget.as_ref()).unwrap_or(filling_width);
 				let inner_layout = inner_layout.with_width(child_width).with_x(x);
 				*solved_layout = widget.solve_layout(&inner_layout);
 
@@ -235,11 +226,7 @@ fn solve_flex_layout(
 				0.
 			} else {
 				let fixed_height: f32 = (children.iter())
-					.filter_map(|(widget, _)| match widget.layout().height {
-						DimScalar::Fill => None,
-						DimScalar::Hug => Some(widget.min_height()),
-						DimScalar::Fixed(w) => Some(w),
-					})
+					.filter_map(|(widget, _)| solve_height(widget.as_ref()))
 					.sum();
 
 				let gap_width = flex_layout.gap * children.len().saturating_sub(1) as f32;
@@ -249,12 +236,7 @@ fn solve_flex_layout(
 
 			let mut y = inner_layout.y_start();
 			for (widget, solved_layout) in children.iter_mut() {
-				let child_height = match widget.layout().height {
-					DimScalar::Fill => filling_height,
-					DimScalar::Hug => widget.min_height(),
-					DimScalar::Fixed(w) => w,
-				};
-
+				let child_height = solve_height(widget.as_ref()).unwrap_or(filling_height);
 				let inner_layout = inner_layout.with_height(child_height).with_y(y);
 				*solved_layout = widget.solve_layout(&inner_layout);
 

@@ -6,7 +6,7 @@ use skia_safe::{Canvas, Color, Font, Paint, Rect};
 use crate::indentation;
 use crate::layout::{Anchor, Layout, SolvedLayout};
 use crate::lazy::Lazy;
-use crate::widget::{Event, Widget};
+use crate::widget::{Event, Widget, default_solve_layout};
 
 pub struct Text<T: Display> {
 	layout: Layout,
@@ -45,7 +45,7 @@ impl<T: Display> Widget for Text<T> {
 	}
 
 	fn solve_layout(&mut self, parent_layout: &SolvedLayout) -> SolvedLayout {
-		self.default_solve_layout(parent_layout)
+		default_solve_layout(self, parent_layout)
 	}
 
 	fn min_width(&self) -> f32 {

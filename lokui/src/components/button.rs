@@ -6,7 +6,7 @@ use skia_safe::{Canvas, Color, Paint, Rect};
 use crate::indentation;
 use crate::layout::{Layout, Padding, SolvedLayout};
 use crate::lazy::Laz;
-use crate::widget::{Event, Widget};
+use crate::widget::{default_solve_layout, Event, Widget};
 
 use super::text::Text;
 
@@ -48,7 +48,7 @@ impl<T: Display> Widget for Button<T> {
 	}
 
 	fn solve_layout(&mut self, parent_layout: &SolvedLayout) -> SolvedLayout {
-		let layout = self.default_solve_layout(parent_layout);
+		let layout = default_solve_layout(self, parent_layout);
 		self.text_layout = (self.text).solve_layout(&layout.padded(Padding::vh(5., 10.)));
 		layout
 	}
