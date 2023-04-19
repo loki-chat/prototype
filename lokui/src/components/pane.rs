@@ -6,17 +6,12 @@ use crate::indentation;
 use crate::layout::{DimScalar, Direction, FlexLayout, Layout, Padding, SolvedLayout};
 use crate::widget::{Event, Widget};
 
-pub struct PaneChild {
-	solved_layout: SolvedLayout,
-	widget: Box<dyn Widget>,
-}
-
 #[derive(Default)]
 pub struct Pane {
 	layout: Layout,
 	padding: Padding,
 	flex_layout: Option<FlexLayout>,
-	children: Vec<PaneChild>,
+	children: Vec<(Box<dyn Widget>, SolvedLayout)>,
 }
 
 pub fn pane() -> Pane {
@@ -49,14 +44,11 @@ impl Pane {
 	}
 
 	pub fn add_dyn_child(&mut self, widget: Box<dyn Widget>) {
-		self.children.push(PaneChild {
-			solved_layout: SolvedLayout::default(),
-			widget,
-		});
+		self.children.push((widget, SolvedLayout::default()));
 	}
 
 	pub fn pop_child(&mut self) -> Option<Box<dyn Widget>> {
-		self.children.pop().map(|child| child.widget)
+		self.children.pop().map(|(widget, _)| widget)
 	}
 }
 
@@ -75,16 +67,16 @@ impl Widget for Pane {
 			match flex_layout.direction {
 				Direction::Horizontal => {
 					let fills_count = (self.children.iter())
-						.filter(|child| child.widget.layout().width.is_fill())
+						.filter(|(widget, _)| widget.layout().width.is_fill())
 						.count();
 
 					let filling_width = if fills_count == 0 {
 						0.
 					} else {
 						let fixed_width: f32 = (self.children.iter())
-							.filter_map(|child| match child.widget.layout().width {
+							.filter_map(|(widget, _)| match widget.layout().width {
 								DimScalar::Fill => None,
-								DimScalar::Hug => Some(child.widget.min_width()),
+								DimScalar::Hug => Some(widget.min_width()),
 								DimScalar::Fixed(w) => Some(w),
 							})
 							.sum();
@@ -94,17 +86,17 @@ impl Widget for Pane {
 					};
 
 					let mut x = inner_layout.x_start();
-					for child in &mut self.children {
+					for (widget, solved_layout) in &mut self.children {
 						// Each child is given a slice of the inner layout.
 
-						let child_width = match child.widget.layout().width {
+						let child_width = match widget.layout().width {
 							DimScalar::Fill => filling_width,
-							DimScalar::Hug => child.widget.min_width(),
+							DimScalar::Hug => widget.min_width(),
 							DimScalar::Fixed(w) => w,
 						};
 
 						let inner_layout = inner_layout.with_width(child_width).with_x(x);
-						child.solved_layout = child.widget.solve_layout(&inner_layout);
+						*solved_layout = widget.solve_layout(&inner_layout);
 
 						x += child_width;
 					}
@@ -114,16 +106,16 @@ impl Widget for Pane {
 					// copy-pasted from the Horizontal case but for height?
 
 					let fills_count = (self.children.iter())
-						.filter(|child| child.widget.layout().height.is_fill())
+						.filter(|(widget, _)| widget.layout().height.is_fill())
 						.count();
 
 					let filling_height = if fills_count == 0 {
 						0.
 					} else {
 						let fixed_height: f32 = (self.children.iter())
-							.filter_map(|child| match child.widget.layout().height {
+							.filter_map(|(widget, _)| match widget.layout().height {
 								DimScalar::Fill => None,
-								DimScalar::Hug => Some(child.widget.min_height()),
+								DimScalar::Hug => Some(widget.min_height()),
 								DimScalar::Fixed(w) => Some(w),
 							})
 							.sum();
@@ -133,15 +125,15 @@ impl Widget for Pane {
 					};
 
 					let mut y = inner_layout.y_start();
-					for child in &mut self.children {
-						let child_height = match child.widget.layout().height {
+					for (widget, solved_layout) in &mut self.children {
+						let child_height = match widget.layout().height {
 							DimScalar::Fill => filling_height,
-							DimScalar::Hug => child.widget.min_height(),
+							DimScalar::Hug => widget.min_height(),
 							DimScalar::Fixed(w) => w,
 						};
 
 						let inner_layout = inner_layout.with_height(child_height).with_y(y);
-						child.solved_layout = child.widget.solve_layout(&inner_layout);
+						*solved_layout = widget.solve_layout(&inner_layout);
 
 						y += child_height;
 					}
@@ -150,8 +142,8 @@ impl Widget for Pane {
 		} else {
 			// Without flex-layout, all children are superposed to each other.
 
-			for child in &mut self.children {
-				child.solved_layout = child.widget.solve_layout(&inner_layout);
+			for (widget, solved_layout) in &mut self.children {
+				*solved_layout = widget.solve_layout(&inner_layout);
 			}
 		}
 
@@ -164,9 +156,9 @@ impl Widget for Pane {
 		if let Some(flex_layout) = self.flex_layout.as_ref() {
 			if flex_layout.direction == Direction::Horizontal {
 				let inner_min_width: f32 = (self.children.iter())
-					.map(|child| match child.widget.layout().width {
+					.map(|(widget, _)| match widget.layout().width {
 						DimScalar::Fixed(w) => w,
-						_ => child.widget.min_width(),
+						_ => widget.min_width(),
 					})
 					.sum();
 
@@ -175,7 +167,7 @@ impl Widget for Pane {
 		}
 
 		let inner_min_width = (self.children.iter())
-			.map(|child| child.widget.min_width())
+			.map(|(widget, _)| widget.min_width())
 			.max_by(|x, y| x.total_cmp(y))
 			.unwrap_or_default();
 
@@ -188,9 +180,9 @@ impl Widget for Pane {
 		if let Some(flex_layout) = self.flex_layout.as_ref() {
 			if flex_layout.direction == Direction::Vertical {
 				let inner_min_height: f32 = (self.children.iter())
-					.map(|child| match child.widget.layout().height {
+					.map(|(widget, _)| match widget.layout().height {
 						DimScalar::Fixed(h) => h,
-						_ => child.widget.min_height(),
+						_ => widget.min_height(),
 					})
 					.sum();
 
@@ -199,7 +191,7 @@ impl Widget for Pane {
 		}
 
 		let inner_min_height = (self.children.iter())
-			.map(|child| child.widget.min_height())
+			.map(|(widget, _)| widget.min_height())
 			.max_by(|x, y| x.total_cmp(y))
 			.unwrap_or_default();
 
@@ -208,8 +200,8 @@ impl Widget for Pane {
 
 	fn debug(&self, w: &mut dyn io::Write, deepness: usize) -> io::Result<()> {
 		writeln!(w, "{}<pane>", indentation(deepness))?;
-		for child in &self.children {
-			child.widget.debug(w, deepness + 1)?;
+		for (widget, _) in &self.children {
+			widget.debug(w, deepness + 1)?;
 		}
 		writeln!(w, "{}</pane>", indentation(deepness))
 	}
@@ -234,8 +226,8 @@ impl Widget for Pane {
 		paint.set_color(Color::from(0xff_00cc51));
 		canvas.draw_rect(rect, &paint);
 
-		for child in &self.children {
-			child.widget.draw(canvas, &child.solved_layout);
+		for (widget, solved_layout) in &self.children {
+			widget.draw(canvas, solved_layout);
 		}
 	}
 
@@ -248,8 +240,8 @@ impl Widget for Pane {
 		};
 
 		if should_handle {
-			for child in &mut self.children {
-				handled |= child.widget.handle_event(event, &child.solved_layout);
+			for (widget, solved_layout) in &mut self.children {
+				handled |= widget.handle_event(event, solved_layout);
 
 				if handled {
 					break;
