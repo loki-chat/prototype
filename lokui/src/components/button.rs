@@ -1,12 +1,14 @@
 use std::fmt::Display;
 use std::io;
+use std::time::Duration;
 
-use skia_safe::{Canvas, Color, Paint, Rect};
+use skia_safe::{Canvas, Paint, Rect};
 
+use crate::anim::{ease, Property};
 use crate::events::{Event, MousePosition};
 use crate::indentation;
 use crate::layout::{Layout, Padding, SolvedLayout};
-use crate::lazy::Laz;
+use crate::state::{lazy, Color, Laz, Lazy};
 use crate::widget::{default_solve_layout, Widget};
 
 use super::text::Text;
@@ -15,6 +17,7 @@ pub struct Button<T: Display> {
 	layout: Layout,
 	text_layout: SolvedLayout,
 	text: Text<T>,
+	color: Lazy<Property<Color>>,
 	on_click: Option<Box<dyn FnMut(f32, f32)>>,
 	enabled: Laz<bool>,
 	is_mouse_down: bool,
@@ -26,6 +29,7 @@ pub fn button<T: Display>(text: Text<T>) -> Button<T> {
 		layout: Layout::hug(),
 		text_layout: SolvedLayout::default(),
 		text,
+		color: lazy(Property::new(Color::from_hex(0xff0051))),
 		on_click: None,
 		enabled: Laz::new(true),
 		is_mouse_down: false,
@@ -85,19 +89,14 @@ impl<T: Display> Widget for Button<T> {
 		paint.set_anti_alias(true);
 		paint.set_stroke_width(2.);
 
-		let color = match (self.enabled.get(), self.is_mouse_down) {
-			(true, true) => 0xa70038,
-			(true, false) if self.hovered => 0xff415a,
-			(true, false) if !self.hovered => 0xff0051,
-			_ => 0x7a4553,
-		};
+		let color = self.color.get_mut().current().into_skia();
 
 		paint.set_stroke(false);
-		paint.set_color(Color::from(0x80_000000 | color));
+		paint.set_color(color.with_a(0x80));
 		canvas.draw_rect(rect, &paint);
 
 		paint.set_stroke(true);
-		paint.set_color(Color::from(0xff_000000 | color));
+		paint.set_color(color.with_a(0xff));
 		canvas.draw_rect(rect, &paint);
 
 		self.text.draw(canvas, &self.text_layout);
@@ -105,7 +104,7 @@ impl<T: Display> Widget for Button<T> {
 
 	fn handle_event(&mut self, event: Event, _layout: &SolvedLayout) -> bool {
 		if self.enabled.get() {
-			match event {
+			let handled = match event {
 				Event::MouseDown(_) => {
 					self.is_mouse_down = true;
 					true
@@ -130,8 +129,20 @@ impl<T: Display> Widget for Button<T> {
 					self.is_mouse_down = false;
 					true
 				}
-				_ => false,
-			}
+				_ => return false,
+			};
+
+			let color = match (self.enabled.get(), self.is_mouse_down) {
+				(true, true) => 0xa70038,
+				(true, false) if self.hovered => 0x51ffff,
+				(true, false) => 0xff0051,
+				_ => 0x7a4553,
+			};
+
+			let color = Color::from_hex(color);
+			(self.color.get_mut()).go_to(color, ease::out_quint, Duration::from_millis(500));
+
+			handled
 		} else {
 			false
 		}

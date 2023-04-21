@@ -7,7 +7,7 @@ use lokui::components::pane::{pane, Pane};
 use lokui::components::text::text;
 use lokui::events::{Event, MousePosition};
 use lokui::layout::{Anchor, DimScalar, Direction, FlexLayout, Layout, Padding, SolvedLayout};
-use lokui::lazy::{laz, lazy};
+use lokui::state::{laz, lazy};
 use lokui::widget::Widget;
 use miniquad::skia::SkiaContext;
 use miniquad::{conf, EventHandler};
