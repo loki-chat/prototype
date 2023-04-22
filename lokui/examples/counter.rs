@@ -3,17 +3,19 @@
 use std::io::{stdout, BufWriter, Write};
 
 use lokui::components::button::button;
-use lokui::components::pane::{pane, Pane};
+use lokui::components::pane::pane;
 use lokui::components::text::text;
+use lokui::components::wrappers::BackgroundState;
+use lokui::components::WidgetExt;
 use lokui::events::{Event, MousePosition};
 use lokui::layout::{Anchor, DimScalar, Direction, FlexLayout, Layout, Padding, SolvedLayout};
-use lokui::state::{laz, lazy};
+use lokui::state::{laz, lazy, Color};
 use lokui::widget::Widget;
 use miniquad::skia::SkiaContext;
 use miniquad::{conf, EventHandler};
-use skia_safe::{Color, Font, FontStyle, Typeface};
+use skia_safe::{Font, FontStyle, Typeface};
 
-fn counter() -> Pane {
+fn counter() -> impl Widget {
 	let value = laz(0);
 
 	let increment = {
@@ -58,7 +60,12 @@ fn counter() -> Pane {
 								.with_origin(Anchor::CENTER)
 								.with_anchor(Anchor::CENTER),
 						)
-						.child(text(value, font.clone())),
+						.child(text(value, font.clone()))
+						.bg(lazy(BackgroundState::new(
+							Color::from_hex(0xff_33aa55),
+							5.,
+							None,
+						))),
 				)
 				.child(
 					button(text("+1", font.clone()))
@@ -79,17 +86,27 @@ fn counter() -> Pane {
 								.with_anchor(Anchor::CENTER),
 						)
 						.on_click(decrement),
-				),
+				)
+				.bg(lazy(BackgroundState::new(
+					Color::from_hex(0x80_657cb1),
+					5.,
+					None,
+				))),
 		)
+		.bg(lazy(BackgroundState::new(
+			Color::from_hex(0xff_2e428c),
+			10.,
+			None,
+		)))
 }
 
-struct Stage {
-	root_pane: Pane,
+struct Stage<W: Widget> {
+	root_widget: W,
 	root_layout: SolvedLayout,
 	window_layout: SolvedLayout,
 }
 
-impl EventHandler for Stage {
+impl<W: Widget> EventHandler for Stage<W> {
 	fn update(&mut self, _skia_ctx: &mut SkiaContext) {}
 
 	fn mouse_button_down_event(
@@ -100,7 +117,7 @@ impl EventHandler for Stage {
 		y: f32,
 	) {
 		let event = Event::MouseDown(MousePosition { x, y });
-		self.root_pane.handle_event(event, &self.root_layout);
+		self.root_widget.handle_event(event, &self.root_layout);
 	}
 
 	fn mouse_button_up_event(
@@ -111,24 +128,24 @@ impl EventHandler for Stage {
 		y: f32,
 	) {
 		let event = Event::MouseUp(MousePosition { x, y });
-		self.root_pane.handle_event(event, &self.root_layout);
+		self.root_widget.handle_event(event, &self.root_layout);
 	}
 
 	fn mouse_motion_event(&mut self, _skia_ctx: &mut SkiaContext, x: f32, y: f32) {
 		let event = Event::MouseMove(MousePosition { x, y });
-		self.root_pane.handle_event(event, &self.root_layout);
+		self.root_widget.handle_event(event, &self.root_layout);
 	}
 
 	fn resize_event(&mut self, skia_ctx: &mut SkiaContext, width: f32, height: f32) {
 		self.window_layout = SolvedLayout::from_top_left(0., 0., width, height);
-		self.root_layout = self.root_pane.solve_layout(&self.window_layout);
+		self.root_layout = self.root_widget.solve_layout(&self.window_layout);
 		skia_ctx.recreate_surface(width as i32, height as i32);
 	}
 
 	fn draw(&mut self, skia_ctx: &mut SkiaContext) {
 		let canvas = skia_ctx.surface.canvas();
-		canvas.clear(Color::from(0xff_161a1d));
-		self.root_pane.draw(canvas, &self.root_layout);
+		canvas.clear(skia_safe::Color::from(0xff_161a1d));
+		self.root_widget.draw(canvas, &self.root_layout);
 		skia_ctx.dctx.flush(None);
 	}
 }
@@ -152,7 +169,7 @@ fn main() {
 		},
 		move || {
 			Box::new(Stage {
-				root_pane,
+				root_widget: root_pane,
 				root_layout,
 				window_layout,
 			})

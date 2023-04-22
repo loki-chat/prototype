@@ -73,6 +73,7 @@ impl<T: Copy + fmt::Display> fmt::Display for Laz<T> {
 
 #[derive(Clone, Copy)]
 pub struct Color {
+	a: f32,
 	r: f32,
 	g: f32,
 	b: f32,
@@ -80,41 +81,44 @@ pub struct Color {
 
 impl Color {
 	pub fn from_hex(hex: u32) -> Self {
+		let a = ((hex >> 24) & 0xff) as u8;
 		let r = ((hex >> 16) & 0xff) as u8;
 		let g = ((hex >> 8) & 0xff) as u8;
 		let b = (hex & 0xff) as u8;
-		Self::from_rgb(r, g, b)
+		Self::from_argb(a, r, g, b)
 	}
 
-	pub fn from_rgb(r: u8, g: u8, b: u8) -> Self {
+	pub fn from_argb(a: u8, r: u8, g: u8, b: u8) -> Self {
 		Self {
+			a: a as f32 / 255.,
 			r: r as f32 / 255.,
 			g: g as f32 / 255.,
 			b: b as f32 / 255.,
 		}
 	}
 
-	pub fn rgb_f32(&self) -> (f32, f32, f32) {
+	pub fn argb_f32(&self) -> (f32, f32, f32, f32) {
 		(
+			(self.a * 255.).clamp(0., 255.).round(),
 			(self.r * 255.).clamp(0., 255.).round(),
 			(self.g * 255.).clamp(0., 255.).round(),
 			(self.b * 255.).clamp(0., 255.).round(),
 		)
 	}
 
-	pub fn rgb(&self) -> (u8, u8, u8) {
-		let (r, g, b) = self.rgb_f32();
-		(r as u8, g as u8, b as u8)
+	pub fn argb(&self) -> (u8, u8, u8, u8) {
+		let (a, r, g, b) = self.argb_f32();
+		(a as u8, r as u8, g as u8, b as u8)
 	}
 
-	pub fn rgb_i32(&self) -> (i32, i32, i32) {
-		let (r, g, b) = self.rgb_f32();
-		(r as i32, g as i32, b as i32)
+	pub fn rgb_i32(&self) -> (i32, i32, i32, i32) {
+		let (a, r, g, b) = self.argb_f32();
+		(a as i32, r as i32, g as i32, b as i32)
 	}
 
 	pub fn into_skia(self) -> skia_safe::Color {
-		let (r, g, b) = self.rgb();
-		skia_safe::Color::from_rgb(r, g, b)
+		let (a, r, g, b) = self.argb();
+		skia_safe::Color::from_argb(a, r, g, b)
 	}
 }
 
@@ -128,6 +132,7 @@ impl Add for Color {
 	type Output = Self;
 
 	fn add(mut self, rhs: Self) -> Self::Output {
+		self.a += rhs.a;
 		self.r += rhs.r;
 		self.g += rhs.g;
 		self.b += rhs.b;
@@ -139,6 +144,7 @@ impl Sub for Color {
 	type Output = Self;
 
 	fn sub(mut self, rhs: Self) -> Self::Output {
+		self.a -= rhs.a;
 		self.r -= rhs.r;
 		self.g -= rhs.g;
 		self.b -= rhs.b;
@@ -150,6 +156,7 @@ impl Mul<f32> for Color {
 	type Output = Self;
 
 	fn mul(mut self, rhs: f32) -> Self::Output {
+		self.a *= rhs;
 		self.r *= rhs;
 		self.g *= rhs;
 		self.b *= rhs;

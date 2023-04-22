@@ -147,25 +147,25 @@ impl Widget for Pane {
 		writeln!(w, "{}</pane>", indentation(deepness))
 	}
 
-	fn draw(&self, canvas: &mut Canvas, layout: &SolvedLayout) {
-		let rect = Rect::from_xywh(
-			layout.x_start(),
-			layout.y_start(),
-			layout.width(),
-			layout.height(),
-		);
+	fn draw(&self, canvas: &mut Canvas, _layout: &SolvedLayout) {
+		// let rect = Rect::from_xywh(
+		// 	layout.x_start(),
+		// 	layout.y_start(),
+		// 	layout.width(),
+		// 	layout.height(),
+		// );
 
-		let mut paint = Paint::default();
-		paint.set_anti_alias(true);
-		paint.set_stroke_width(2.);
+		// let mut paint = Paint::default();
+		// paint.set_anti_alias(true);
+		// paint.set_stroke_width(2.);
 
-		paint.set_stroke(false);
-		paint.set_color(Color::from(0x40_00cc51));
-		canvas.draw_rect(rect, &paint);
+		// paint.set_stroke(false);
+		// paint.set_color(Color::from(0x40_00cc51));
+		// canvas.draw_rect(rect, &paint);
 
-		paint.set_stroke(true);
-		paint.set_color(Color::from(0xff_00cc51));
-		canvas.draw_rect(rect, &paint);
+		// paint.set_stroke(true);
+		// paint.set_color(Color::from(0xff_00cc51));
+		// canvas.draw_rect(rect, &paint);
 
 		for child in &self.children {
 			child.widget.draw(canvas, &child.solved_layout);
