@@ -10,7 +10,7 @@ use lokui::components::WidgetExt;
 use lokui::events::{Event, MousePosition};
 use lokui::layout::{Anchor, DimScalar, Direction, FlexLayout, Layout, Padding, SolvedLayout};
 use lokui::state::{laz, lazy, Color};
-use lokui::widget::Widget;
+use lokui::widget::{Widget, WidgetContainer};
 use miniquad::skia::SkiaContext;
 use miniquad::{conf, EventHandler};
 use skia_safe::{Font, FontStyle, Typeface};
@@ -44,6 +44,11 @@ fn counter() -> impl Widget {
 				.with_anchor(Anchor::CENTER)
 				.with_dimension(DimScalar::Fixed(400.), DimScalar::Fixed(250.)),
 		)
+		.bg(lazy(BackgroundState::new(
+			Color::from_hex(0xff_2e428c),
+			10.,
+			None,
+		)))
 		.child(
 			pane()
 				.with_padding(Padding::vh(5., 10.))
@@ -52,6 +57,11 @@ fn counter() -> impl Widget {
 					gap: 5.,
 				})
 				.with_layout(Layout::new().with_dimension(DimScalar::Fill, DimScalar::Fill))
+				.bg(lazy(BackgroundState::new(
+					Color::from_hex(0x80_657cb1),
+					5.,
+					None,
+				)))
 				.child(
 					pane()
 						.with_layout(
@@ -86,18 +96,8 @@ fn counter() -> impl Widget {
 								.with_anchor(Anchor::CENTER),
 						)
 						.on_click(decrement),
-				)
-				.bg(lazy(BackgroundState::new(
-					Color::from_hex(0x80_657cb1),
-					5.,
-					None,
-				))),
+				),
 		)
-		.bg(lazy(BackgroundState::new(
-			Color::from_hex(0xff_2e428c),
-			10.,
-			None,
-		)))
 }
 
 struct Stage<W: Widget> {

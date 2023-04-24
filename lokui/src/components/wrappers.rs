@@ -13,6 +13,20 @@ pub struct WithPadding<W: Widget> {
 	padding: Padding,
 }
 
+impl<W: Widget> Deref for WithPadding<W> {
+    type Target = W;
+
+    fn deref(&self) -> &Self::Target {
+        &self.widget
+    }
+}
+
+impl<W: Widget> DerefMut for WithPadding<W> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.widget
+    }
+}
+
 impl<W: Widget> Widget for WithPadding<W> {
 	fn layout(&self) -> &Layout {
 		self.widget.layout()

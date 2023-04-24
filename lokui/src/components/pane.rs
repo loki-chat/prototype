@@ -1,11 +1,11 @@
 use std::io;
 
-use skia_safe::{Canvas, Color, Paint, Rect};
+use skia_safe::Canvas;
 
 use crate::events::{Event, MousePosition};
 use crate::indentation;
 use crate::layout::{DimScalar, Direction, FlexLayout, Layout, Padding, SolvedLayout};
-use crate::widget::{default_solve_layout, solve_height, solve_width, Widget};
+use crate::widget::{default_solve_layout, solve_height, solve_width, Widget, WidgetContainer};
 
 struct PaneChild {
 	widget: Box<dyn Widget>,
@@ -50,21 +50,14 @@ impl Pane {
 		self.flex_layout = Some(flex_layout);
 		self
 	}
+}
 
-	pub fn child(mut self, widget: impl Widget + 'static) -> Self {
-		self.add_child(widget);
-		self
-	}
-
-	pub fn add_child(&mut self, widget: impl Widget + 'static) {
-		self.add_dyn_child(Box::new(widget));
-	}
-
-	pub fn add_dyn_child(&mut self, widget: Box<dyn Widget>) {
+impl WidgetContainer for Pane {
+	fn add_dyn_child(&mut self, widget: Box<dyn Widget>) {
 		self.children.push(PaneChild::new(widget));
 	}
 
-	pub fn pop_child(&mut self) -> Option<Box<dyn Widget>> {
+	fn pop_child(&mut self) -> Option<Box<dyn Widget>> {
 		self.children.pop().map(|child| child.widget)
 	}
 }
@@ -148,25 +141,6 @@ impl Widget for Pane {
 	}
 
 	fn draw(&self, canvas: &mut Canvas, _layout: &SolvedLayout) {
-		// let rect = Rect::from_xywh(
-		// 	layout.x_start(),
-		// 	layout.y_start(),
-		// 	layout.width(),
-		// 	layout.height(),
-		// );
-
-		// let mut paint = Paint::default();
-		// paint.set_anti_alias(true);
-		// paint.set_stroke_width(2.);
-
-		// paint.set_stroke(false);
-		// paint.set_color(Color::from(0x40_00cc51));
-		// canvas.draw_rect(rect, &paint);
-
-		// paint.set_stroke(true);
-		// paint.set_color(Color::from(0xff_00cc51));
-		// canvas.draw_rect(rect, &paint);
-
 		for child in &self.children {
 			child.widget.draw(canvas, &child.solved_layout);
 		}

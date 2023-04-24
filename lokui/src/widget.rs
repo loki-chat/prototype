@@ -1,4 +1,5 @@
 use std::io;
+use std::ops::DerefMut;
 
 use skia_safe::Canvas;
 
@@ -60,4 +61,32 @@ pub fn default_solve_layout(
 
 	let (x, y) = parent_layout.point_at_anchor(widget.layout().anchor);
 	SolvedLayout::from_origin(widget.layout().origin, x, y, width, height)
+}
+
+pub trait WidgetContainer {
+	fn pop_child(&mut self) -> Option<Box<dyn Widget>>;
+	fn add_dyn_child(&mut self, widget: Box<dyn Widget>);
+
+	fn add_child(&mut self, widget: impl Widget + 'static) {
+		self.add_dyn_child(Box::new(widget));
+	}
+
+	fn child(mut self, widget: impl Widget + 'static) -> Self
+	where
+		Self: Sized,
+	{
+		self.add_child(widget);
+		self
+	}
+}
+
+/// Anything that mut-derefs to a WidgetContainer is also a WidgetContainer.
+impl<V: WidgetContainer, W: DerefMut<Target = V>> WidgetContainer for W {
+	fn add_dyn_child(&mut self, widget: Box<dyn Widget>) {
+		self.deref_mut().add_dyn_child(widget);
+	}
+
+	fn pop_child(&mut self) -> Option<Box<dyn Widget>> {
+		self.deref_mut().pop_child()
+	}
 }
