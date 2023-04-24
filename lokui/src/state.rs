@@ -1,6 +1,6 @@
-use std::cell::{Cell, Ref, RefCell, RefMut};
+use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::{self, Debug};
-use std::ops::{Add, Deref, Mul, Sub};
+use std::ops::{Add, Mul, Sub};
 use std::rc::Rc;
 
 pub struct Lazy<T>(Rc<RefCell<T>>);
