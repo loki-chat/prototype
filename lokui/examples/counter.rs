@@ -9,19 +9,19 @@ use lokui::components::wrappers::BackgroundState;
 use lokui::components::WidgetExt;
 use lokui::events::{Event, MousePosition};
 use lokui::layout::{Anchor, DimScalar, Direction, FlexLayout, Layout, Padding, SolvedLayout};
-use lokui::state::{laz, lazy, Color};
+use lokui::state::{lazy, Color};
 use lokui::widget::{Widget, WidgetContainer};
 use miniquad::skia::SkiaContext;
 use miniquad::{conf, EventHandler};
 use skia_safe::{Font, FontStyle, Typeface};
 
 fn counter() -> impl Widget {
-	let value = laz(0);
+	let value = lazy(0);
 
 	let increment = {
 		let value = value.clone();
 		move |_, _| {
-			value.set(value.get() + 1);
+			value.set(*value.get() + 1);
 			println!("+1! Counter = {}", value.get());
 		}
 	};
@@ -29,7 +29,7 @@ fn counter() -> impl Widget {
 	let decrement = {
 		let value = value.clone();
 		move |_, _| {
-			value.set(value.get() - 1);
+			value.set(*value.get() - 1);
 			println!("-1! Counter = {}", value.get());
 		}
 	};

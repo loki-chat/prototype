@@ -39,38 +39,6 @@ impl<T: Copy + fmt::Display> fmt::Display for Lazy<T> {
 	}
 }
 
-pub struct Laz<T: Copy>(Rc<Cell<T>>);
-
-pub fn laz<T: Copy>(val: T) -> Laz<T> {
-	Laz::new(val)
-}
-
-impl<T: Copy> Laz<T> {
-	pub fn new(val: T) -> Self {
-		Laz(Rc::new(Cell::new(val)))
-	}
-}
-
-impl<T: Copy> Clone for Laz<T> {
-	fn clone(&self) -> Self {
-		Self(Rc::clone(&self.0))
-	}
-}
-
-impl<T: Copy> Deref for Laz<T> {
-	type Target = Cell<T>;
-
-	fn deref(&self) -> &Self::Target {
-		self.0.as_ref()
-	}
-}
-
-impl<T: Copy + fmt::Display> fmt::Display for Laz<T> {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		self.get().fmt(f)
-	}
-}
-
 #[derive(Clone, Copy)]
 pub struct Color {
 	a: f32,

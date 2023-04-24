@@ -8,7 +8,7 @@ use crate::anim::{ease, Property};
 use crate::events::{Event, MousePosition};
 use crate::indentation;
 use crate::layout::{Layout, Padding, SolvedLayout};
-use crate::state::{lazy, Color, Laz, Lazy};
+use crate::state::{lazy, Color, Lazy};
 use crate::widget::{default_solve_layout, Widget};
 
 use super::text::Text;
@@ -19,7 +19,7 @@ pub struct Button<T: Display> {
 	text: Text<T>,
 	color: Lazy<Property<Color>>,
 	on_click: Option<Box<dyn FnMut(f32, f32)>>,
-	enabled: Laz<bool>,
+	enabled: Lazy<bool>,
 	is_mouse_down: bool,
 	hovered: bool,
 }
@@ -31,7 +31,7 @@ pub fn button<T: Display>(text: Text<T>) -> Button<T> {
 		text,
 		color: lazy(Property::new(Color::from_hex(0xff0051))),
 		on_click: None,
-		enabled: Laz::new(true),
+		enabled: Lazy::new(true),
 		is_mouse_down: false,
 		hovered: false,
 	}
@@ -103,7 +103,7 @@ impl<T: Display> Widget for Button<T> {
 	}
 
 	fn handle_event(&mut self, event: Event, _layout: &SolvedLayout) -> bool {
-		if self.enabled.get() {
+		if *self.enabled.get() {
 			let handled = match event {
 				Event::MouseDown(_) => {
 					self.is_mouse_down = true;
@@ -132,7 +132,7 @@ impl<T: Display> Widget for Button<T> {
 				_ => return false,
 			};
 
-			let color = match (self.enabled.get(), self.is_mouse_down) {
+			let color = match (*self.enabled.get(), self.is_mouse_down) {
 				(true, true) => 0xa70038,
 				(true, false) if self.hovered => 0x51ffff,
 				(true, false) => 0xff0051,
