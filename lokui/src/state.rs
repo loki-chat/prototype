@@ -21,10 +21,6 @@ impl<T> Lazy<T> {
 	pub fn get_mut(&self) -> RefMut<T> {
 		(*self.0).borrow_mut()
 	}
-
-	pub fn set(&self, val: T) {
-		*self.0.borrow_mut() = val;
-	}
 }
 
 impl<T> Clone for Lazy<T> {
