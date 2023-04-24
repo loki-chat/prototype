@@ -21,7 +21,7 @@ fn counter() -> impl Widget {
 	let increment = {
 		let value = value.clone();
 		move |_, _| {
-			value.set(*value.get() + 1);
+			*value.get_mut() += 1;
 			println!("+1! Counter = {}", value.get());
 		}
 	};
@@ -29,7 +29,7 @@ fn counter() -> impl Widget {
 	let decrement = {
 		let value = value.clone();
 		move |_, _| {
-			value.set(*value.get() - 1);
+			*value.get_mut() -= 1;
 			println!("-1! Counter = {}", value.get());
 		}
 	};
