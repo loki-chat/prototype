@@ -2,14 +2,10 @@
 
 use std::io::{stdout, BufWriter, Write};
 
-use lokui::components::button::button;
-use lokui::components::pane::pane;
-use lokui::components::text::text;
-use lokui::components::WidgetExt;
 use lokui::events::{Event, MousePosition};
-use lokui::layout::{Anchor, DimScalar, Direction, Flex, Layout, Padding, SolvedLayout};
-use lokui::state::{lazy, RectState};
-use lokui::widget::{Widget, WidgetContainer};
+use lokui::layout::SolvedLayout;
+use lokui::prelude::*;
+
 use miniquad::skia::SkiaContext;
 use miniquad::{conf, EventHandler};
 use skia_safe::{Font, FontStyle, Typeface};
@@ -40,7 +36,7 @@ fn counter() -> impl Widget {
 		.with_layout(
 			Layout::new()
 				.with_anchor(Anchor::CENTER)
-				.with_dimension(DimScalar::Fixed(400.), DimScalar::Fixed(250.)),
+				.with_dimension(Fixed(400.), Fixed(250.)),
 		)
 		.padding(Padding::splat(10.))
 		.bg(lazy(RectState::new(0xff_2e428c, 10., None)))
@@ -50,14 +46,14 @@ fn counter() -> impl Widget {
 					direction: Direction::Horizontal,
 					gap: 5.,
 				})
-				.with_layout(Layout::new().with_dimension(DimScalar::Fill, DimScalar::Fill))
+				.with_layout(Layout::new().with_dimension(Fill, Fill))
 				.padding(Padding::vh(5., 10.))
 				.bg(lazy(RectState::new(0x80_657cb1, 5., None)))
 				.child(
 					pane()
 						.with_layout(
 							Layout::new()
-								.with_dimension(DimScalar::Fill, DimScalar::Fixed(50.))
+								.with_dimension(Fill, Fixed(50.))
 								.with_origin(Anchor::CENTER)
 								.with_anchor(Anchor::CENTER),
 						)
@@ -68,7 +64,7 @@ fn counter() -> impl Widget {
 					button(text("+1", font.clone()))
 						.with_layout(
 							Layout::new()
-								.with_dimension(DimScalar::Fixed(80.), DimScalar::Fixed(50.))
+								.with_dimension(Fixed(80.), Fixed(50.))
 								.with_origin(Anchor::CENTER)
 								.with_anchor(Anchor::CENTER),
 						)
@@ -78,7 +74,7 @@ fn counter() -> impl Widget {
 					button(text("-1", font))
 						.with_layout(
 							Layout::new()
-								.with_dimension(DimScalar::Fixed(80.), DimScalar::Fixed(50.))
+								.with_dimension(Fixed(80.), Fixed(50.))
 								.with_origin(Anchor::CENTER)
 								.with_anchor(Anchor::CENTER),
 						)
