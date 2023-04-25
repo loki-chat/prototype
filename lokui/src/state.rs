@@ -130,6 +130,12 @@ impl Mul<f32> for Color {
 	}
 }
 
+impl From<u32> for Color {
+    fn from(value: u32) -> Self {
+        Self::from_hex(value)
+    }
+}
+
 pub struct RectState {
 	pub color: Property<Color>,
 	pub border_radius: Property<f32>,
@@ -137,9 +143,9 @@ pub struct RectState {
 }
 
 impl RectState {
-	pub fn new(color: Color, border_radius: f32, stroke: Option<(Color, f32)>) -> Self {
+	pub fn new(color: impl Into<Color>, border_radius: f32, stroke: Option<(Color, f32)>) -> Self {
 		Self {
-			color: Property::new(color),
+			color: Property::new(color.into()),
 			border_radius: Property::new(border_radius),
 			stroke: stroke.map(|(c, w)| (Property::new(c), Property::new(w))),
 		}
