@@ -7,7 +7,7 @@ use lokui::components::pane::pane;
 use lokui::components::text::text;
 use lokui::components::WidgetExt;
 use lokui::events::{Event, MousePosition};
-use lokui::layout::{Anchor, DimScalar, Direction, FlexLayout, Layout, Padding, SolvedLayout};
+use lokui::layout::{Anchor, DimScalar, Direction, Flex, Layout, Padding, SolvedLayout};
 use lokui::state::{lazy, RectState};
 use lokui::widget::{Widget, WidgetContainer};
 use miniquad::skia::SkiaContext;
@@ -46,7 +46,7 @@ fn counter() -> impl Widget {
 		.bg(lazy(RectState::new(0xff_2e428c, 10., None)))
 		.child(
 			pane()
-				.with_flex_layout(FlexLayout {
+				.with_flex(Flex {
 					direction: Direction::Horizontal,
 					gap: 5.,
 				})

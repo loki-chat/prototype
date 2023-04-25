@@ -4,7 +4,7 @@ use skia_safe::Canvas;
 
 use crate::events::{Event, MousePosition};
 use crate::indentation;
-use crate::layout::{DimScalar, Direction, FlexLayout, Layout, SolvedLayout};
+use crate::layout::{DimScalar, Direction, Flex, Layout, SolvedLayout};
 use crate::widget::{default_solve_layout, solve_height, solve_width, Widget, WidgetContainer};
 
 struct PaneChild {
@@ -26,7 +26,7 @@ impl PaneChild {
 #[derive(Default)]
 pub struct Pane {
 	layout: Layout,
-	flex_layout: Option<FlexLayout>,
+	flex: Option<Flex>,
 	children: Vec<PaneChild>,
 }
 
@@ -40,8 +40,8 @@ impl Pane {
 		self
 	}
 
-	pub fn with_flex_layout(mut self, flex_layout: FlexLayout) -> Self {
-		self.flex_layout = Some(flex_layout);
+	pub fn with_flex(mut self, flex: Flex) -> Self {
+		self.flex = Some(flex);
 		self
 	}
 }
@@ -65,8 +65,8 @@ impl Widget for Pane {
 		let layout = default_solve_layout(self, parent_layout);
 
 		let inner_layout = layout;
-		if let Some(flex_layout) = &self.flex_layout {
-			solve_flex_layout(flex_layout, &mut self.children, inner_layout);
+		if let Some(flex) = &self.flex {
+			solve_flex_layout(flex, &mut self.children, inner_layout);
 		} else {
 			// Without flex-layout, all children are superposed to each other.
 
@@ -79,8 +79,8 @@ impl Widget for Pane {
 	}
 
 	fn min_width(&self) -> f32 {
-		if let Some(flex_layout) = self.flex_layout.as_ref() {
-			if flex_layout.direction == Direction::Horizontal {
+		if let Some(flex) = self.flex.as_ref() {
+			if flex.direction == Direction::Horizontal {
 				let inner_min_width: f32 = (self.children.iter())
 					.map(|child| match child.widget.layout().width {
 						DimScalar::Fixed(w) => w,
@@ -101,8 +101,8 @@ impl Widget for Pane {
 	}
 
 	fn min_height(&self) -> f32 {
-		if let Some(flex_layout) = self.flex_layout.as_ref() {
-			if flex_layout.direction == Direction::Vertical {
+		if let Some(flex) = self.flex.as_ref() {
+			if flex.direction == Direction::Vertical {
 				let inner_min_height: f32 = (self.children.iter())
 					.map(|child| match child.widget.layout().height {
 						DimScalar::Fixed(h) => h,
@@ -172,11 +172,11 @@ impl Widget for Pane {
 ///
 /// With a flex layout, all children are placed next to each other, vertically or horizontally.
 fn solve_flex_layout(
-	flex_layout: &FlexLayout,
+	flex: &Flex,
 	children: &mut [PaneChild],
 	inner_layout: SolvedLayout,
 ) {
-	match flex_layout.direction {
+	match flex.direction {
 		Direction::Horizontal => {
 			let fills_count = (children.iter())
 				.filter(|child| child.widget.layout().width.is_fill())
@@ -189,7 +189,7 @@ fn solve_flex_layout(
 					.filter_map(|child| solve_width(child.widget.as_ref()))
 					.sum();
 
-				let gap_width = flex_layout.gap * children.len().saturating_sub(1) as f32;
+				let gap_width = flex.gap * children.len().saturating_sub(1) as f32;
 				let leftover_width = (inner_layout.width() - fixed_width - gap_width).max(0.);
 				leftover_width / fills_count as f32
 			};
@@ -202,7 +202,7 @@ fn solve_flex_layout(
 				let inner_layout = inner_layout.with_width(child_width).with_x(x);
 				child.solved_layout = child.widget.solve_layout(&inner_layout);
 
-				x += child_width + flex_layout.gap;
+				x += child_width + flex.gap;
 			}
 		}
 		Direction::Vertical => {
@@ -220,7 +220,7 @@ fn solve_flex_layout(
 					.filter_map(|child| solve_height(child.widget.as_ref()))
 					.sum();
 
-				let gap_width = flex_layout.gap * children.len().saturating_sub(1) as f32;
+				let gap_width = flex.gap * children.len().saturating_sub(1) as f32;
 				let leftover_height = (inner_layout.height() - fixed_height - gap_width).max(0.);
 				leftover_height / fills_count as f32
 			};
@@ -231,7 +231,7 @@ fn solve_flex_layout(
 				let inner_layout = inner_layout.with_height(child_height).with_y(y);
 				child.solved_layout = child.widget.solve_layout(&inner_layout);
 
-				y += child_height + flex_layout.gap;
+				y += child_height + flex.gap;
 			}
 		}
 	}
