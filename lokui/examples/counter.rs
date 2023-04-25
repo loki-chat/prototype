@@ -38,7 +38,7 @@ fn counter() -> impl Widget {
 				.with_anchor(Anchor::CENTER)
 				.with_dimension(Fixed(400.), Fixed(250.)),
 		)
-		.padding(Padding::splat(10.))
+		.with_padding(Padding::splat(10.))
 		.bg(lazy(RectState::new(0xff_2e428c, 10., None)))
 		.child(
 			pane()
@@ -47,7 +47,7 @@ fn counter() -> impl Widget {
 					gap: 5.,
 				})
 				.with_layout(Layout::new().with_dimension(Fill, Fill))
-				.padding(Padding::vh(5., 10.))
+				.with_padding(Padding::vh(5., 10.))
 				.bg(lazy(RectState::new(0x80_657cb1, 5., None)))
 				.child(
 					pane()

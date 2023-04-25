@@ -4,7 +4,7 @@ use skia_safe::Canvas;
 
 use crate::events::{Event, MousePosition};
 use crate::indentation;
-use crate::layout::{DimScalar, Direction, Flex, Layout, SolvedLayout};
+use crate::layout::{DimScalar, Direction, Flex, Layout, SolvedLayout, Padding};
 use crate::widget::{default_solve_layout, solve_height, solve_width, Widget, WidgetContainer};
 
 struct PaneChild {
@@ -26,6 +26,7 @@ impl PaneChild {
 #[derive(Default)]
 pub struct Pane {
 	layout: Layout,
+	padding: Padding,
 	flex: Option<Flex>,
 	children: Vec<PaneChild>,
 }
@@ -37,6 +38,11 @@ pub fn pane() -> Pane {
 impl Pane {
 	pub fn with_layout(mut self, layout: Layout) -> Self {
 		self.layout = layout;
+		self
+	}
+
+	pub fn with_padding(mut self, padding: Padding) -> Self {
+		self.padding = padding;
 		self
 	}
 
@@ -64,7 +70,7 @@ impl Widget for Pane {
 	fn solve_layout(&mut self, parent_layout: &SolvedLayout) -> SolvedLayout {
 		let layout = default_solve_layout(self, parent_layout);
 
-		let inner_layout = layout;
+		let inner_layout = layout.padded(self.padding);
 		if let Some(flex) = &self.flex {
 			solve_flex_layout(flex, &mut self.children, inner_layout);
 		} else {
@@ -79,6 +85,8 @@ impl Widget for Pane {
 	}
 
 	fn min_width(&self) -> f32 {
+		let width_pad = self.padding.left + self.padding.right;
+
 		if let Some(flex) = self.flex.as_ref() {
 			if flex.direction == Direction::Horizontal {
 				let inner_min_width: f32 = (self.children.iter())
@@ -88,7 +96,7 @@ impl Widget for Pane {
 					})
 					.sum();
 
-				return inner_min_width;
+				return inner_min_width + width_pad;
 			}
 		}
 
@@ -97,10 +105,12 @@ impl Widget for Pane {
 			.max_by(|x, y| x.total_cmp(y))
 			.unwrap_or_default();
 
-		inner_min_width
+		inner_min_width + width_pad
 	}
 
 	fn min_height(&self) -> f32 {
+		let height_pad = self.padding.top + self.padding.bottom;
+
 		if let Some(flex) = self.flex.as_ref() {
 			if flex.direction == Direction::Vertical {
 				let inner_min_height: f32 = (self.children.iter())
@@ -110,7 +120,7 @@ impl Widget for Pane {
 					})
 					.sum();
 
-				return inner_min_height;
+				return inner_min_height + height_pad;
 			}
 		}
 
@@ -119,7 +129,7 @@ impl Widget for Pane {
 			.max_by(|x, y| x.total_cmp(y))
 			.unwrap_or_default();
 
-		inner_min_height
+		inner_min_height + height_pad
 	}
 
 	fn debug(&self, w: &mut dyn io::Write, deepness: usize) -> io::Result<()> {
