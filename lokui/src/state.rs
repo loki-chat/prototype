@@ -3,6 +3,8 @@ use std::fmt::{self, Debug};
 use std::ops::{Add, Mul, Sub};
 use std::rc::Rc;
 
+use crate::anim::Property;
+
 pub struct Lazy<T>(Rc<RefCell<T>>);
 
 pub fn lazy<T>(val: T) -> Lazy<T> {
@@ -125,5 +127,21 @@ impl Mul<f32> for Color {
 		self.g *= rhs;
 		self.b *= rhs;
 		self
+	}
+}
+
+pub struct RectState {
+	pub color: Property<Color>,
+	pub border_radius: Property<f32>,
+	pub stroke: Option<(Property<Color>, Property<f32>)>,
+}
+
+impl RectState {
+	pub fn new(color: Color, border_radius: f32, stroke: Option<(Color, f32)>) -> Self {
+		Self {
+			color: Property::new(color),
+			border_radius: Property::new(border_radius),
+			stroke: stroke.map(|(c, w)| (Property::new(c), Property::new(w))),
+		}
 	}
 }

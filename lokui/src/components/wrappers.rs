@@ -2,29 +2,30 @@ use std::ops::{Deref, DerefMut};
 
 use skia_safe::{Canvas, Paint, RRect, Rect};
 
-use crate::anim::Property;
 use crate::events::Event;
-use crate::layout::{Layout, Padding, SolvedLayout};
-use crate::state::{Color, Lazy};
+use crate::layout::{Layout, SolvedLayout, Padding};
+use crate::state::{Lazy, RectState};
 use crate::widget::Widget;
 
+// padding
+
 pub struct WithPadding<W: Widget> {
-	widget: W,
-	padding: Padding,
+	pub(super) widget: W,
+	pub(super) padding: Padding,
 }
 
 impl<W: Widget> Deref for WithPadding<W> {
-    type Target = W;
+	type Target = W;
 
-    fn deref(&self) -> &Self::Target {
-        &self.widget
-    }
+	fn deref(&self) -> &Self::Target {
+		&self.widget
+	}
 }
 
 impl<W: Widget> DerefMut for WithPadding<W> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.widget
-    }
+	fn deref_mut(&mut self) -> &mut Self::Target {
+		&mut self.widget
+	}
 }
 
 impl<W: Widget> Widget for WithPadding<W> {
@@ -53,28 +54,12 @@ impl<W: Widget> Widget for WithPadding<W> {
 	}
 }
 
-pub struct BackgroundState {
-	pub color: Property<Color>,
-	pub border_radius: Property<f32>,
-	pub stroke: Option<(Property<Color>, Property<f32>)>,
+pub struct WithBg<W: Widget> {
+	pub(super) widget: W,
+	pub(super) state: Lazy<RectState>,
 }
 
-impl BackgroundState {
-	pub fn new(color: Color, border_radius: f32, stroke: Option<(Color, f32)>) -> Self {
-		Self {
-			color: Property::new(color),
-			border_radius: Property::new(border_radius),
-			stroke: stroke.map(|(c, w)| (Property::new(c), Property::new(w))),
-		}
-	}
-}
-
-pub struct WithBackground<W: Widget> {
-	pub(crate) widget: W,
-	pub(crate) state: Lazy<BackgroundState>,
-}
-
-impl<W: Widget> Deref for WithBackground<W> {
+impl<W: Widget> Deref for WithBg<W> {
 	type Target = W;
 
 	fn deref(&self) -> &Self::Target {
@@ -82,13 +67,13 @@ impl<W: Widget> Deref for WithBackground<W> {
 	}
 }
 
-impl<W: Widget> DerefMut for WithBackground<W> {
+impl<W: Widget> DerefMut for WithBg<W> {
 	fn deref_mut(&mut self) -> &mut Self::Target {
 		&mut self.widget
 	}
 }
 
-impl<W: Widget> Widget for WithBackground<W> {
+impl<W: Widget> Widget for WithBg<W> {
 	fn layout(&self) -> &Layout {
 		self.widget.layout()
 	}

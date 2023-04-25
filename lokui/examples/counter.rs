@@ -5,11 +5,10 @@ use std::io::{stdout, BufWriter, Write};
 use lokui::components::button::button;
 use lokui::components::pane::pane;
 use lokui::components::text::text;
-use lokui::components::wrappers::BackgroundState;
 use lokui::components::WidgetExt;
 use lokui::events::{Event, MousePosition};
 use lokui::layout::{Anchor, DimScalar, Direction, FlexLayout, Layout, Padding, SolvedLayout};
-use lokui::state::{lazy, Color};
+use lokui::state::{lazy, Color, RectState};
 use lokui::widget::{Widget, WidgetContainer};
 use miniquad::skia::SkiaContext;
 use miniquad::{conf, EventHandler};
@@ -38,30 +37,26 @@ fn counter() -> impl Widget {
 	let font = lazy(Font::new(typeface, Some(20.)));
 
 	pane()
-		.with_padding(Padding::splat(10.))
 		.with_layout(
 			Layout::new()
 				.with_anchor(Anchor::CENTER)
 				.with_dimension(DimScalar::Fixed(400.), DimScalar::Fixed(250.)),
 		)
-		.bg(lazy(BackgroundState::new(
+		.padding(Padding::splat(10.))
+		.bg(lazy(RectState::new(
 			Color::from_hex(0xff_2e428c),
 			10.,
 			None,
 		)))
 		.child(
 			pane()
-				.with_padding(Padding::vh(5., 10.))
 				.with_flex_layout(FlexLayout {
 					direction: Direction::Horizontal,
 					gap: 5.,
 				})
 				.with_layout(Layout::new().with_dimension(DimScalar::Fill, DimScalar::Fill))
-				.bg(lazy(BackgroundState::new(
-					Color::from_hex(0x80_657cb1),
-					5.,
-					None,
-				)))
+				.padding(Padding::vh(5., 10.))
+				.bg(lazy(RectState::new(Color::from_hex(0x80_657cb1), 5., None)))
 				.child(
 					pane()
 						.with_layout(
@@ -71,11 +66,7 @@ fn counter() -> impl Widget {
 								.with_anchor(Anchor::CENTER),
 						)
 						.child(text(value, font.clone()))
-						.bg(lazy(BackgroundState::new(
-							Color::from_hex(0xff_33aa55),
-							5.,
-							None,
-						))),
+						.bg(lazy(RectState::new(Color::from_hex(0xff_33aa55), 5., None))),
 				)
 				.child(
 					button(text("+1", font.clone()))
