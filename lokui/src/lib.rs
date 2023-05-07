@@ -1,13 +1,11 @@
-mod app;
-mod components;
-mod ecs;
+pub mod app;
+pub mod components;
+pub mod ecs;
 
-#[cfg(test)]
-mod test {
-	use crate::app::App;
-
-	#[test]
-	fn test() {
-		let app = App::default();
-	}
+pub mod prelude {
+	pub use crate::app::{App, WidgetBuilder};
+	pub use crate::components::{
+		AnonymousState, Child, Clickable, Drawable, Parent, Position, State, Text,
+	};
+	pub use crate::ecs::Query;
 }
