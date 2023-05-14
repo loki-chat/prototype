@@ -10,7 +10,6 @@ pub mod widget;
 pub mod prelude {
 	pub use crate::components::WidgetExt;
 
-	pub use crate::components::button::button;
 	pub use crate::components::pane::pane;
 	pub use crate::components::text::text;
 
@@ -18,7 +17,7 @@ pub mod prelude {
 	pub use crate::layout::padding::Padding;
 	pub use crate::layout::DimScalar::*;
 	pub use crate::layout::{Direction, Flex, Layout};
-	pub use crate::state::{lazy, RectState};
+	pub use crate::state::{lazy, Lazy, RectState};
 	pub use crate::widget::{Widget, WidgetContainer};
 }
 

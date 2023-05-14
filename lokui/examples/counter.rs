@@ -1,35 +1,77 @@
 #![allow(clippy::unusual_byte_groupings)]
 
 use std::io::{stdout, BufWriter, Write};
+use std::time::Duration;
 
+use lokui::anim::ease;
 use lokui::events::{Event, MousePosition};
 use lokui::layout::SolvedLayout;
 use lokui::prelude::*;
 
+use lokui::state::Color;
 use miniquad::skia::SkiaContext;
 use miniquad::{conf, EventHandler};
 use skia_safe::{Font, FontStyle, Typeface};
 
+/// Curried increment callback.
+fn increment(value: Lazy<i32>) -> impl Fn(f32, f32) {
+	move |_, _| {
+		*value.get_mut() += 1;
+		println!("+1! Counter = {}", value.get());
+	}
+}
+
+/// Curried decrement callback.
+fn decrement(value: Lazy<i32>) -> impl Fn(f32, f32) {
+	move |_, _| {
+		*value.get_mut() -= 1;
+		println!("-1! Counter = {}", value.get());
+	}
+}
+
+fn counter_button_color_handler(bg: Lazy<RectState>) -> impl FnMut(Event) -> bool {
+	/// wrapper struct to have a simple non-copy background color
+	struct BgColor(u32);
+
+	let mut bg_color = BgColor(0xff0051);
+	move |event| {
+		bg_color.0 = match event {
+			Event::MouseDown(_) => 0xa70038,
+			Event::MouseIn | Event::MouseUp(_) => 0x51ffff,
+			Event::MouseOut => 0xff0051,
+			_ => bg_color.0,
+		};
+
+		let color = Color::from_hex(0xff_000000 | bg_color.0);
+		(bg.get_mut().color).go_to(color, ease::out_quint, Duration::from_millis(500));
+
+		false
+	}
+}
+
+fn counter_button(
+	text: impl Widget + 'static,
+	on_click: impl FnMut(f32, f32) + 'static,
+) -> impl Widget {
+	let background = lazy(RectState::new(0xff_ff0051, 5., None));
+
+	pane()
+		.with_layout(
+			Layout::new()
+				.with_dimension(Fixed(80.), Fixed(50.))
+				.with_origin(Anchor::CENTER)
+				.with_anchor(Anchor::CENTER),
+		)
+		.child(text)
+		.bg(background.clone())
+		.on_click(on_click)
+		.on_event(counter_button_color_handler(background))
+}
+
 fn counter() -> impl Widget {
 	let value = lazy(0);
 
-	let increment = {
-		let value = value.clone();
-		move |_, _| {
-			*value.get_mut() += 1;
-			println!("+1! Counter = {}", value.get());
-		}
-	};
-
-	let decrement = {
-		let value = value.clone();
-		move |_, _| {
-			*value.get_mut() -= 1;
-			println!("-1! Counter = {}", value.get());
-		}
-	};
-
-	let typeface = Typeface::new("Torus Pro", FontStyle::normal()).unwrap();
+	let typeface = Typeface::new("Roboto", FontStyle::normal()).unwrap();
 	let font = lazy(Font::new(typeface, Some(20.)));
 
 	pane()
@@ -57,29 +99,17 @@ fn counter() -> impl Widget {
 								.with_origin(Anchor::CENTER)
 								.with_anchor(Anchor::CENTER),
 						)
-						.child(text(value, font.clone()))
+						.child(text(value.clone(), font.clone()))
 						.bg(lazy(RectState::new(0xff_33aa55, 5., None))),
 				)
-				.child(
-					button(text("+1", font.clone()))
-						.with_layout(
-							Layout::new()
-								.with_dimension(Fixed(80.), Fixed(50.))
-								.with_origin(Anchor::CENTER)
-								.with_anchor(Anchor::CENTER),
-						)
-						.on_click(increment),
-				)
-				.child(
-					button(text("-1", font))
-						.with_layout(
-							Layout::new()
-								.with_dimension(Fixed(80.), Fixed(50.))
-								.with_origin(Anchor::CENTER)
-								.with_anchor(Anchor::CENTER),
-						)
-						.on_click(decrement),
-				),
+				.child(counter_button(
+					text("+1", font.clone()),
+					increment(value.clone()),
+				))
+				.child(counter_button(
+					text("-1", font),
+					decrement(value),
+				)),
 		)
 }
 
