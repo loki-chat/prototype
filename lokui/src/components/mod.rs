@@ -13,7 +13,7 @@ pub trait WidgetExt: Widget {
 	where
 		Self: Sized;
 
-	fn on_click(self, callback: impl FnMut(f32, f32) + 'static) -> WithOnClick<Self>
+	fn on_click(self, callback: impl FnMut(f32, f32) -> bool + 'static) -> WithOnClick<Self>
 	where
 		Self: Sized;
 
@@ -33,7 +33,7 @@ impl<T: Widget> WidgetExt for T {
 		}
 	}
 
-	fn on_click(self, callback: impl FnMut(f32, f32) + 'static) -> WithOnClick<Self>
+	fn on_click(self, callback: impl FnMut(f32, f32) -> bool + 'static) -> WithOnClick<Self>
 	where
 		Self: Sized,
 	{

@@ -84,7 +84,7 @@ impl<W: Widget> Widget for WithBg<W> {
 
 pub struct WithOnClick<W> {
 	pub(super) widget: W,
-	pub(super) on_click: Box<dyn FnMut(f32, f32)>,
+	pub(super) on_click: Box<dyn FnMut(f32, f32) -> bool>,
 	pub(super) is_mouse_down: bool,
 }
 
@@ -124,21 +124,32 @@ impl<W: Widget> Widget for WithOnClick<W> {
 	}
 
 	fn handle_event(&mut self, event: Event, layout: &SolvedLayout) -> bool {
-		match event {
+		let handled = match event {
 			Event::MouseDown(_) => {
 				self.is_mouse_down = true;
+				false
 			}
 			Event::MouseUp(MousePosition { x, y }) => {
 				if self.is_mouse_down {
 					self.is_mouse_down = false;
 					(self.on_click)(x, y);
+					true
+				} else {
+					false
 				}
 			}
-			Event::MouseOut => self.is_mouse_down = false,
-			_ => (),
-		}
+			Event::MouseOut => {
+				self.is_mouse_down = false;
+				false
+			},
+			_ => false,
+		};
 
-		self.widget.handle_event(event, layout)
+		if !handled {
+			self.widget.handle_event(event, layout)
+		} else {
+			true
+		}
 	}
 }
 

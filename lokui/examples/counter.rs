@@ -14,18 +14,20 @@ use miniquad::{conf, EventHandler};
 use skia_safe::{Font, FontStyle, Typeface};
 
 /// Curried increment callback.
-fn increment(value: Lazy<i32>) -> impl Fn(f32, f32) {
+fn increment(value: Lazy<i32>) -> impl Fn(f32, f32) -> bool {
 	move |_, _| {
 		*value.get_mut() += 1;
 		println!("+1! Counter = {}", value.get());
+		true
 	}
 }
 
 /// Curried decrement callback.
-fn decrement(value: Lazy<i32>) -> impl Fn(f32, f32) {
+fn decrement(value: Lazy<i32>) -> impl Fn(f32, f32) -> bool {
 	move |_, _| {
 		*value.get_mut() -= 1;
 		println!("-1! Counter = {}", value.get());
+		true
 	}
 }
 
@@ -51,7 +53,7 @@ fn counter_button_color_handler(bg: Lazy<RectState>) -> impl FnMut(Event) -> boo
 
 fn counter_button(
 	text: impl Widget + 'static,
-	on_click: impl FnMut(f32, f32) + 'static,
+	on_click: impl FnMut(f32, f32) -> bool + 'static,
 ) -> impl Widget {
 	let background = lazy(RectState::new(0xff_ff0051, 5., None));
 
