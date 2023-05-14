@@ -77,6 +77,15 @@ impl Color {
 		(a as u8, r as u8, g as u8, b as u8)
 	}
 
+	pub fn argb_hex(&self) -> u32 {
+		let (a, r, g, b) = self.argb();
+		let a = (a as u32) << 24;
+		let r = (r as u32) << 16;
+		let g = (g as u32) << 8;
+		let b = b as u32;
+		a | r | g | b
+	}
+
 	pub fn rgb_i32(&self) -> (i32, i32, i32, i32) {
 		let (a, r, g, b) = self.argb_f32();
 		(a as i32, r as i32, g as i32, b as i32)
