@@ -35,12 +35,14 @@ fn counter_button_color_handler(bg: Lazy<RectState>) -> impl FnMut(Event) -> boo
 	/// wrapper struct to have a simple non-copy background color
 	struct BgColor(u32);
 
-	let mut bg_color = BgColor(0xff0051);
+	let idle_color = bg.get_mut().color.current().argb_hex();
+
+	let mut bg_color = BgColor(idle_color);
 	move |event| {
 		bg_color.0 = match event {
-			Event::MouseDown(_) => 0xa70038,
-			Event::MouseIn | Event::MouseUp(_) => 0x51ffff,
-			Event::MouseOut => 0xff0051,
+			Event::MouseDown(_) => 0x3d3556,
+			Event::MouseIn | Event::MouseUp(_) => 0xaa95f0,
+			Event::MouseOut => idle_color,
 			_ => bg_color.0,
 		};
 
@@ -55,7 +57,7 @@ fn counter_button(
 	text: impl Widget + 'static,
 	on_click: impl FnMut(f32, f32) -> bool + 'static,
 ) -> impl Widget {
-	let background = lazy(RectState::new(0xff_ff0051, 5., None));
+	let background = lazy(RectState::new(0xff_000000 | 0x8460f0, 5., None));
 
 	pane()
 		.with_layout(
@@ -74,7 +76,7 @@ fn counter() -> impl Widget {
 	let value = lazy(0);
 
 	let typeface = Typeface::new("Roboto", FontStyle::normal()).unwrap();
-	let font = lazy(Font::new(typeface, Some(20.)));
+	let font = lazy(Font::new(typeface, Some(16.)));
 
 	pane()
 		.with_layout(
@@ -83,7 +85,7 @@ fn counter() -> impl Widget {
 				.with_dimension(Fixed(400.), Fixed(250.)),
 		)
 		.with_padding(Padding::splat(10.))
-		.bg(lazy(RectState::new(0xff_2e428c, 10., None)))
+		.bg(lazy(RectState::new(0xff_232128, 10., None)))
 		.child(
 			pane()
 				.with_flex(Flex {
@@ -92,7 +94,7 @@ fn counter() -> impl Widget {
 				})
 				.with_layout(Layout::new().with_dimension(Fill, Fill))
 				.with_padding(Padding::vh(5., 10.))
-				.bg(lazy(RectState::new(0x80_657cb1, 5., None)))
+				.bg(lazy(RectState::new(0xff_2e2c35, 5., None)))
 				.child(
 					pane()
 						.with_layout(
@@ -102,7 +104,7 @@ fn counter() -> impl Widget {
 								.with_anchor(Anchor::CENTER),
 						)
 						.child(text(value.clone(), font.clone()))
-						.bg(lazy(RectState::new(0xff_33aa55, 5., None))),
+						.bg(lazy(RectState::new(0xff_232128, 5., None))),
 				)
 				.child(counter_button(
 					text("+1", font.clone()),
