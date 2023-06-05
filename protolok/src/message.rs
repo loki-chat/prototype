@@ -1,6 +1,9 @@
-use rsa::{PaddingScheme, Pkcs1v15Encrypt, PublicKey, RsaPrivateKey, RsaPublicKey};
+use rsa::{Pkcs1v15Encrypt, PublicKey, RsaPrivateKey, RsaPublicKey};
 
-use crate::user::UserHandle;
+use crate::{
+	ids::{make_id, LokiMeta, Object},
+	user::UserHandle,
+};
 
 #[derive(Clone)]
 pub struct UnencryptedContent {
@@ -19,11 +22,11 @@ pub enum MessageContent {
 	Unencrypted(UnencryptedContent),
 }
 impl MessageContent {
-	fn is_encrypted(&self) -> bool {
+	pub fn is_encrypted(&self) -> bool {
 		matches!(self, &MessageContent::Encrypted { .. })
 	}
 
-	fn decrypt(&self, key: &RsaPrivateKey) -> Result<MessageContent, rsa::errors::Error> {
+	pub fn decrypt(&self, key: &RsaPrivateKey) -> Result<MessageContent, rsa::errors::Error> {
 		match self {
 			MessageContent::Encrypted(EncryptedContent { hash, enc_text }) => {
 				key.decrypt(Pkcs1v15Encrypt, &enc_text).map(|x| {
@@ -39,9 +42,9 @@ impl MessageContent {
 }
 
 pub struct Message {
-	id: Option<String>,
-	from: Option<UserHandle>,
-	content: MessageContent,
+	pub id: u64,
+	pub from: Option<UserHandle>,
+	pub content: MessageContent,
 }
 
 pub fn encrypt(
@@ -56,4 +59,10 @@ pub fn encrypt(
 			&unencrypted.text.as_bytes(),
 		)?,
 	}))
+}
+
+impl Object for Message {
+	fn initialize(&mut self, meta: &LokiMeta) {
+		self.id = make_id(meta);
+	}
 }
