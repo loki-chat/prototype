@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 loki-shared = { path = "../loki-shared" }
 protolok = { path = "../protolok" }
+rsa = "0.9"
+
