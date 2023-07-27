@@ -1,7 +1,7 @@
 #![allow(clippy::unusual_byte_groupings)]
 
 use std::num::NonZeroU32;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use glutin::surface::GlSurface;
 use lokui::anim::ease;
@@ -14,9 +14,8 @@ use winit::event::{ElementState, Event, MouseButton};
 
 use lokui::state::Color;
 use skia_safe::{Font, FontStyle, Typeface};
-use skia_window::create_skia_window;
+use skia_window::{create_skia_window, SkiaWindowCtx};
 use winit::event::{KeyboardInput, VirtualKeyCode, WindowEvent};
-use winit::event_loop::ControlFlow;
 
 use crate::skia_window::create_surface;
 
@@ -131,8 +130,7 @@ struct RootWidgetTree<W: Widget> {
 }
 
 fn main() {
-	let mut win =
-		create_skia_window("Lokui GUI Framework Prototype (Counter Example)", 1280, 720).unwrap();
+	let win = create_skia_window("Lokui GUI Framework Prototype (Counter)", 1280, 720).unwrap();
 
 	let mut rwt = {
 		let mut root_widget = counter();
@@ -146,21 +144,34 @@ fn main() {
 		}
 	};
 
-	let mut frame = 0_usize;
-	let mut previous_frame_start = Instant::now();
 	let mut x = 0;
 	let mut y = 0;
 
-	win.events.run(move |event, _, control_flow| {
-		let frame_start = Instant::now();
-		let mut draw_frame = false;
+	let SkiaWindowCtx {
+		fb_info,
+		num_samples,
+		stencil_size,
+		mut surface,
+		gl_surface,
+		mut gr_context,
+		gl_context,
+		mut window,
+		events,
+	} = win;
+
+	window.request_redraw();
+	events.run(move |event, _, control_flow| {
+		let window = &mut window;
+		let surface = &mut surface;
+		let gr_context = &mut gr_context;
+		let gl_context = &gl_context;
 
 		match event {
 			Event::LoopDestroyed => {}
 			Event::WindowEvent { event, .. } => match event {
 				WindowEvent::CloseRequested => {
-					*control_flow = ControlFlow::Exit;
-					return;
+					println!("Closing...");
+					control_flow.set_exit();
 				}
 				WindowEvent::Resized(physical_size) => {
 					/* First resize the opengl drawable */
@@ -170,19 +181,22 @@ fn main() {
 						SolvedLayout::from_top_left(0., 0., width as f32, height as f32);
 					rwt.root_layout = rwt.root_widget.solve_layout(&rwt.window_layout);
 
-					win.surface = create_surface(
-						&mut win.window,
-						win.fb_info,
-						&mut win.gr_context,
-						win.num_samples,
-						win.stencil_size,
+					*surface = create_surface(
+						window,
+						fb_info,
+						gr_context,
+						num_samples,
+						stencil_size,
 					);
 
-					win.gl_surface.resize(
-						&win.gl_context,
+					gl_surface.resize(
+						gl_context,
 						NonZeroU32::new(width.max(1)).unwrap(),
 						NonZeroU32::new(height.max(1)).unwrap(),
 					);
+
+					window.request_redraw();
+					control_flow.set_wait();
 				}
 				WindowEvent::MouseInput { state, button, .. } => {
 					if button == MouseButton::Left {
@@ -198,6 +212,8 @@ fn main() {
 
 						rwt.root_widget.handle_event(event, &rwt.root_layout);
 					}
+
+					control_flow.set_wait();
 				}
 				WindowEvent::CursorMoved { position, .. } => {
 					x = position.x as u32;
@@ -208,47 +224,31 @@ fn main() {
 						y: position.y as f32,
 					});
 					rwt.root_widget.handle_event(event, &rwt.root_layout);
+
+					control_flow.set_wait();
 				}
 				WindowEvent::KeyboardInput {
-					input: KeyboardInput {
-						virtual_keycode, ..
-					},
+					input:
+						KeyboardInput {
+							virtual_keycode: Some(VirtualKeyCode::Q),
+							..
+						},
 					..
-				} => {
-					if let Some(VirtualKeyCode::Q) = virtual_keycode {
-						*control_flow = ControlFlow::Exit;
-					}
-
-					frame = frame.saturating_sub(10);
-					win.window.request_redraw();
-				}
-				_ => (),
+				} => control_flow.set_exit(),
+				_ => control_flow.set_wait(),
 			},
 			Event::RedrawRequested(_) => {
-				draw_frame = true;
+				let canvas = surface.canvas();
+				canvas.clear(skia_safe::Color::from(0xff_161a1d));
+				rwt.root_widget.draw(canvas, &rwt.root_layout);
+
+				gr_context.flush_and_submit();
+				gl_surface.swap_buffers(gl_context).unwrap();
+
+				window.request_redraw();
+				control_flow.set_wait();
 			}
-			_ => (),
+			_ => control_flow.set_wait(),
 		}
-
-		let expected_frame_length_seconds = 1.0 / 20.0;
-		let frame_duration = Duration::from_secs_f32(expected_frame_length_seconds);
-
-		if frame_start - previous_frame_start > frame_duration {
-			draw_frame = true;
-			previous_frame_start = frame_start;
-		}
-
-		if draw_frame {
-			frame += 1;
-
-			let canvas = win.surface.canvas();
-			canvas.clear(skia_safe::Color::from(0xff_161a1d));
-			rwt.root_widget.draw(canvas, &rwt.root_layout);
-
-			win.gr_context.flush_and_submit();
-			win.gl_surface.swap_buffers(&win.gl_context).unwrap();
-		}
-
-		*control_flow = ControlFlow::WaitUntil(previous_frame_start + frame_duration)
 	});
 }
