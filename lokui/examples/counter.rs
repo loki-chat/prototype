@@ -192,8 +192,8 @@ fn main() {
 						};
 
 						let event = match state {
-							ElementState::Pressed => LokuiEvent::MouseUp(mouse_pos),
-							ElementState::Released => LokuiEvent::MouseDown(mouse_pos),
+							ElementState::Pressed => LokuiEvent::MouseDown(mouse_pos),
+							ElementState::Released => LokuiEvent::MouseUp(mouse_pos),
 						};
 
 						rwt.root_widget.handle_event(event, &rwt.root_layout);
