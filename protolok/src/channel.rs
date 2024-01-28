@@ -1,4 +1,4 @@
-use crate::message::{Message, MessageContent};
+use crate::message::Message;
 
 pub trait Channel<ErrorType, Ctx> {
 	fn fetch_newest_messages(
@@ -6,5 +6,5 @@ pub trait Channel<ErrorType, Ctx> {
 		amount: u32,
 		begin_at_id: Option<u64>,
 	) -> Result<Vec<Message>, ErrorType>;
-	fn send_message(&self, message: MessageContent, ctx: Ctx) -> Result<Message, ErrorType>;
+	fn send_message(&self, message: Message, ctx: Ctx) -> Result<(), ErrorType>;
 }

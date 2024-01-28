@@ -4,7 +4,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 const EPOCH: u64 = 1672531200000;
 
-fn generate_id(name: String, home: String, bot: bool) -> u64 {
+fn generate_id(name: &String, home: &String, bot: bool) -> u64 {
 	let mut hash = DefaultHasher::new();
 	hash.write(name.as_bytes());
 	hash.write(home.as_bytes());
@@ -16,7 +16,7 @@ fn generate_id(name: String, home: String, bot: bool) -> u64 {
 		.expect("Time went backwards")
 		.as_millis() as u64;
 
-    time |= bot as u64;
+	time |= bot as u64;
 
 	id >>= 32;
 	id <<= 32;
@@ -35,7 +35,7 @@ pub struct User {
 
 impl User {
 	pub fn new(name: String, home: String, bot: bool) -> User {
-		let id = generate_id(name, home, bot);
+		let id = generate_id(&name, &home, bot);
 		User {
 			name,
 			home,
@@ -47,11 +47,13 @@ impl User {
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn test_unique() {
-        let user1 = User::new("tudbut", "loki.chat", false);
-        let user2 = User::new("tudbut", "loki.chat", true);
-        
-        assert_ne!(user1, user2);
-    }
+	use super::User;
+
+	#[test]
+	fn test_unique() {
+		let user1 = User::new("tudbut".to_owned(), "loki.chat".to_owned(), false);
+		let user2 = User::new("tudbut".to_owned(), "loki.chat".to_owned(), true);
+
+		assert_ne!(user1, user2);
+	}
 }

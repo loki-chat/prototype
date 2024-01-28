@@ -228,12 +228,6 @@ dependencies = [
 [[package]]
 name = "loki-shared"
 version = "0.1.0"
-dependencies = [
- "chacha20poly1305",
- "ed25519-dalek",
- "rand",
- "x25519-dalek",
-]
 
 [[package]]
 name = "lokui"
@@ -291,8 +285,11 @@ dependencies = [
 name = "protolok"
 version = "0.1.0"
 dependencies = [
+ "chacha20poly1305",
+ "ed25519-dalek",
  "rand",
  "sha2",
+ "x25519-dalek",
 ]
 
 [[package]]
