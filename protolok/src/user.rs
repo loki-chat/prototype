@@ -1,44 +1,57 @@
-use crate::ids::{make_id, Object, ServerMeta};
+use std::collections::hash_map::DefaultHasher;
+use std::hash::Hasher;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
+const EPOCH: u64 = 1672531200000;
+
+fn generate_id(name: String, home: String, bot: bool) -> u64 {
+	let mut hash = DefaultHasher::new();
+	hash.write(name.as_bytes());
+	hash.write(home.as_bytes());
+
+	let mut id = hash.finish();
+
+	let mut time: u64 = SystemTime::now()
+		.duration_since(UNIX_EPOCH + Duration::from_millis(EPOCH))
+		.expect("Time went backwards")
+		.as_millis() as u64;
+
+    time |= bot as u64;
+
+	id >>= 32;
+	id <<= 32;
+	id |= time;
+
+	id
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct UserHandle {
+pub struct User {
 	pub name: String,
 	pub home: String,
 	pub bot: bool,
 	pub id: u64,
 }
 
-impl Object for UserHandle {
-	fn initialize(&mut self, meta: &ServerMeta) {
-		self.id = make_id(meta);
-	}
-
-	fn get_id(&self) -> u64 {
-		self.id
+impl User {
+	pub fn new(name: String, home: String, bot: bool) -> User {
+		let id = generate_id(name, home, bot);
+		User {
+			name,
+			home,
+			bot,
+			id,
+		}
 	}
 }
 
 #[cfg(test)]
 mod tests {
-	use std::sync::OnceLock;
-
-	use crate::ids::{id_to_parts, to_unix_time, Object, ServerMeta};
-
-	use super::UserHandle;
-
-	#[test]
-	fn init_test() {
-		static META: OnceLock<ServerMeta> = OnceLock::new();
-		META.get_or_init(|| ServerMeta::new("test.lokichat.xyz"));
-		let mut handle = UserHandle {
-			name: "TudbuT".to_owned(),
-			home: "test.lokichat.xyz".to_owned(),
-			bot: false,
-			id: 0,
-		};
-		handle.initialize(META.get().unwrap());
-		dbg!(handle.id);
-		dbg!(id_to_parts(handle.id));
-		dbg!(to_unix_time(id_to_parts(handle.id).0));
-	}
+    #[test]
+    fn test_unique() {
+        let user1 = User::new("tudbut", "loki.chat", false);
+        let user2 = User::new("tudbut", "loki.chat", true);
+        
+        assert_ne!(user1, user2);
+    }
 }
