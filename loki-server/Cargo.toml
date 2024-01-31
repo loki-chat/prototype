@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 loki-shared = { path = "../loki-shared" }
 protolok = { path = "../protolok" }
+tokio = { version = "1", features = ["full"] }
