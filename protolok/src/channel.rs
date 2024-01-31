@@ -1,4 +1,4 @@
-use crate::message::Message;
+use crate::Message;
 
 pub trait Channel<ErrorType, Ctx> {
 	fn fetch_newest_messages(
